@@ -1,8 +1,802 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+.modal-firma-centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* Modal fondo oscuro y barra de estado */
+.modal-firma {
+  background: #23272f;
+  color: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 40px 0 rgba(37, 99, 235, 0.15);
+  padding: 2.5rem 2rem 2rem 2rem;
+  min-width: 340px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: none;
+}
+.modal-firma-pendiente {
+  border: 4px solid #fbbf24 !important;
+}
+.modal-firma-firmado {
+  border: 4px solid #22c55e !important;
+}
+.modal-firma-rechazado {
+  border: 4px solid #ef4444 !important;
+}
+.modal-estado-box.pendiente {
+  background: #fff7e0;
+  color: #b26a00;
+  border-color: #fbbf24;
+}
+.modal-estado-box.firmado {
+  background: #e6ffed;
+  color: #1a7f37;
+  border-color: #1a7f37;
+}
+.modal-estado-box.rechazado {
+  background: #ffeaea;
+  color: #c00;
+  border-color: #c00;
+}
+.modal-firma-centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.modal-estado-box {
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 8px 28px;
+  border-radius: 10px;
+  border: 2px solid;
+  background: #23272f;
+  margin-bottom: 0.5rem;
   text-align: center;
+  min-width: 120px;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
+}
+.modal-estado-box.pendiente {
+  background: #fff7e0;
+  color: #b26a00;
+  border-color: #fbbf24;
+}
+.modal-estado-box.firmado {
+  background: #e6ffed;
+  color: #1a7f37;
+  border-color: #1a7f37;
+}
+.modal-estado-box.rechazado {
+  background: #ffeaea;
+  color: #c00;
+  border-color: #c00;
+}
+/* Modal de detalle de solicitud */
+.modal-firma-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-firma {
+  background: #23272f;
+  color: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 40px 0 rgba(37, 99, 235, 0.15);
+  padding: 2.5rem 2rem 2rem 2rem;
+  min-width: 340px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 2px solid #2563eb55;
+}
+.modal-firma h2 {
+  margin-top: 0;
+  color: #60a5fa;
+  font-size: 1.5rem;
+  margin-bottom: 1.2rem;
+}
+.modal-firma button {
+  margin-top: 1.5rem;
+}
+/* Toast para feedback de acciones en firmante */
+.toast {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  background: #23272f;
+  color: #fff;
+  padding: 16px 32px;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.18);
+  opacity: 0.97;
+  border: 2px solid #22c55e;
+  transition: border 0.2s;
+}
+.toast.error {
+  border: 2px solid #ef4444;
+}
+.toast.success {
+  border: 2px solid #22c55e;
+}
+/* FirmaCard horizontal layout */
+.firma-card-horizontal .firma-card-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 24px;
+  width: 100%;
+  justify-content: space-between;
+}
+.firma-card-horizontal .firma-card-col {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.firma-card-horizontal .firma-card-col.expediente {
+  flex: initial;
+  width: auto;
+  min-width: max-content;
+  overflow: visible;
+  text-overflow: unset;
+  white-space: normal;
+}
+.firma-card-horizontal .firma-card-col.firmante,
+.firma-card-horizontal .firma-card-col.solicitante {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.firma-card-horizontal .firma-card-col.documentos {
+  flex: 1;
+  min-width: max-content;
+  overflow: visible;
+  text-overflow: unset;
+  white-space: normal;
+}
+.firma-card-horizontal .firma-card-col.estado {
+  flex: 0 0 120px;
+  text-align: right;
+}
+.horizontal-info {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  justify-content: space-between;
+}
+.horizontal-info > div {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.horizontal-info .label {
+  color: #b3b3b3;
+  font-size: 0.95em;
+  font-weight: 500;
+  margin-right: 4px;
+}
+.estado-col {
+  flex: 0 0 120px;
+  text-align: right;
+}
+/* Minimalist solicitudes list for SolicitarFirma */
+.minimal-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.minimal-item {
+  display: flex;
+  align-items: flex-start;
+  background: #23272f;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.07);
+  transition: box-shadow 0.2s;
+  min-height: 56px;
+}
+.minimal-item:hover {
+  box-shadow: 0 4px 16px 0 rgba(37, 99, 235, 0.1);
+}
+.estado-bar {
+  width: 7px;
+  border-radius: 10px 0 0 10px;
+  min-height: 100%;
+  margin-right: 18px;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.solicitud-info {
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+/* Colores para estados de solicitudes */
+.estado {
+  font-weight: bold;
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 10px;
+  border-radius: 8px;
+  font-size: 1rem;
+  min-width: 70px;
+  text-align: center;
+}
+.estado.pendiente {
+  background: #fff7e0;
+  color: #b26a00;
+  border: 1px solid #fbbf24;
+}
+/* Centrar botones de acción en FirmaCard */
+.firma-card .acciones {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+.firma-card .acciones button {
+  font-weight: 600;
+  padding: 7px 22px;
+  border-radius: 6px;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.firma-card .acciones .btn-firmar {
+  background: #22c55e;
+  color: #fff;
+}
+.firma-card .acciones .btn-firmar:hover {
+  background: #16a34a;
+}
+.firma-card .acciones .btn-rechazar {
+  background: #ef4444;
+  color: #fff;
+}
+.firma-card .acciones .btn-rechazar:hover {
+  background: #b91c1c;
+}
+.estado.firmado {
+  background: #e6ffed;
+  color: #1a7f37;
+  border: 1px solid #1a7f37;
+}
+.estado.rechazado {
+  background: #ffeaea;
+  color: #c00;
+  border: 1px solid #c00;
+}
+/* Navbar action buttons */
+.navbar-actions {
+  display: flex;
+  gap: 12px;
+  margin-left: auto;
+  padding-right: 24px;
+}
+
+.btn-navbar {
+  background: #3a3f4b;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-navbar:hover {
+  background: #4e5666;
+}
+/* Login styles */
+.login-bg {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #232526 0%, #414345 100%);
+}
+
+.login-card {
+  background: #23272f;
+  border-radius: 18px;
+  box-shadow: 0 6px 32px 0 rgba(0, 0, 0, 0.25);
+  padding: 48px 36px 36px 36px;
+  min-width: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  position: relative;
+}
+
+.login-card-custom {
+  min-width: 370px;
+  max-width: 95vw;
+  padding: 56px 40px 40px 40px;
+  box-shadow: 0 8px 40px 0 rgba(37, 99, 235, 0.1);
+  border: 1.5px solid #2563eb33;
+}
+
+.app-title-login {
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: #2563eb;
+  margin-bottom: 0.5rem;
+  letter-spacing: 1.5px;
+  text-align: center;
+}
+
+.login-title {
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.login-google-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.login-card h2 {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.custom-select {
+  position: relative;
+  display: inline-block;
+  margin-left: 12px;
+}
+
+.role-selector {
+  background: #3a3f4b;
+  color: #fff;
+  border: 2px solid #4b5563;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+
+.role-selector:hover {
+  border-color: #60a5fa;
+}
+
+.role-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #23272f;
+  border: 2px solid #4b5563;
+  border-radius: 6px;
+  margin-top: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  min-width: 180px;
+  max-width: none;
+  max-height: none;
+  overflow-y: visible;
+  box-sizing: border-box;
+}
+
+.role-option {
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: background 0.2s;
+  min-width: 180px;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.role-option:hover {
+  background: #3a3f4b;
+}
+
+.role-option.selected {
+  background: #2563eb;
+}
+
+/* Asegurar que el navbar-user tenga suficiente espacio */
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: auto;
+  padding: 0 1rem;
+  position: relative;
+}
+body {
+  background: #181c23;
+  font-family: "Inter", Arial, sans-serif;
+  color: #e5e7eb;
+  margin: 0;
+}
+
+/* Navbar modo oscuro */
+.navbar-app {
+  width: 100%;
+  min-height: 56px;
+  background: #23272f;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  max-width: 1200px;
+  box-sizing: border-box;
+  z-index: 10;
+}
+.navbar-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.1rem;
+  position: static; /* Cambiado de relative a static */
+}
+.user-name {
+  font-weight: 500;
+}
+.user-role {
+  color: #a5b4fc;
+  font-size: 1rem;
+}
+
+.custom-select {
+  position: relative;
+  display: inline-block;
+  margin-left: 12px;
+}
+
+.role-selector {
+  background: #3a3f4b;
+  color: #fff;
+  border: 2px solid #4b5563;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  width: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.role-selector:hover:not(:disabled) {
+  border-color: #60a5fa;
+}
+
+.role-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #23272f;
+  border: 2px solid #4b5563;
+  border-radius: 6px;
+  margin-top: 4px;
+  width: 140px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+}
+
+.role-option {
+  padding: 10px 16px;
+  cursor: pointer;
+  color: #fff;
+}
+
+.role-option:hover {
+  background: #3a3f4b;
+}
+
+.role-option.selected {
+  background: #2563eb;
+}
+
+/* Actualizar el orden de los elementos en el navbar */
+.navbar-actions {
+  margin-right: 0;
+  margin-left: auto;
+  order: 2;
+}
+
+.navbar-user {
+  order: 3;
+  margin-left: 24px;
+}
+
+#root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.main-content {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 5.5rem 2rem 2rem 2rem;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.dashboard-solicitante,
+.dashboard-firmante {
+  background: #23272f;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px #0003;
+  padding: 1.5rem 0;
+  margin-bottom: 2rem;
+  margin-top: 0;
+  box-sizing: border-box;
+  overflow-x: auto;
+}
+
+/* Colores de estado para cards de solicitantes */
+.firma-card.pendiente {
+  border-left: 6px solid #facc15;
+  background: #2d2f3a;
+}
+.firma-card.firmado {
+  border-left: 6px solid #22c55e;
+  background: #1e293b;
+}
+.firma-card.rechazado {
+  border-left: 6px solid #ef4444;
+  background: #3f1d1d;
+}
+.firma-card {
+  margin-bottom: 0.5rem;
+  border-radius: 10px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 1px 4px #0003;
+  transition: background 0.2s;
+}
+
+.solicitante-form-section {
+  margin-bottom: 2rem;
+  background: #1e2230;
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+}
+
+.solicitante-list-section {
+  padding: 0 2rem;
+}
+
+.solicitante-list-section h2 {
+  margin-top: 2rem;
+  color: #60a5fa;
+}
+
+.solicitudes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.solicitudes-list.pendientes {
+  border-radius: 8px;
+  padding: 1rem;
+}
+.solicitudes-list.realizadas {
+  border-radius: 8px;
+  /* padding: 1rem; */
+}
+
+.empty-list {
+  color: #64748b;
+  font-style: italic;
+  margin-bottom: 1.5rem;
+}
+
+/* Firmante horizontal list */
+.firmante-list {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.firmante-item {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  background: #23272f;
+  border-radius: 10px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 1px 4px #0003;
+  border-left: 6px solid #2563eb;
+  transition: background 0.2s;
+}
+.firmante-item.pendiente {
+  border-left-color: #facc15;
+  background: #2d2f3a;
+}
+.firmante-item.firmado {
+  border-left-color: #22c55e;
+  background: #1e293b;
+}
+.firmante-item.rechazado {
+  border-left-color: #ef4444;
+  background: #3f1d1d;
+}
+.firmante-item .expediente {
+  min-width: 180px;
+  font-weight: 500;
+}
+.firmante-item .documentos {
+  min-width: 120px;
+  color: #a5b4fc;
+}
+.firmante-item .comentario {
+  color: #60a5fa;
+  font-style: italic;
+  max-width: 800px;
+  white-space: pre-line;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  overflow-x: hidden;
+}
+/* Comentario en tarjetas y modal de FirmaCard */
+.comentario {
+  color: #60a5fa;
+  font-style: italic;
+  max-width: 800px;
+  white-space: pre-line;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  overflow-x: hidden;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 900px) {
+  .comentario,
+  .firmante-item .comentario {
+    max-width: 95vw;
+  }
+}
+.firmante-item .estado {
+  font-weight: bold;
+  margin-left: auto;
+  margin-right: 1.5rem;
+}
+.firmante-item .estado.pendiente span {
+  color: #fde047;
+}
+.firmante-item .estado.firmado span {
+  color: #4ade80;
+}
+.firmante-item .estado.rechazado span {
+  color: #f87171;
+}
+.firmante-item .acciones {
+  display: flex;
+  gap: 0.5rem;
+}
+.btn-firmar {
+  background: #22c55e;
+  color: #181c23;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1.2rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-firmar:hover {
+  background: #15803d;
+  color: #fff;
+}
+.btn-rechazar {
+  background: #ef4444;
+  color: #181c23;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1.2rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-rechazar:hover {
+  background: #b91c1c;
+  color: #fff;
+}
+
+.nueva-solicitud-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  background: #23272f;
+  border-radius: 8px;
+  padding: 1.2rem 1rem;
+  box-shadow: 0 1px 4px #0003;
+  max-width: 420px;
+  margin: 0 auto;
+}
+.nueva-solicitud-form h3 {
+  color: #60a5fa;
+  margin-bottom: 0.5rem;
+}
+.nueva-solicitud-form input,
+.nueva-solicitud-form select {
+  padding: 0.5rem;
+  border-radius: 5px;
+  border: 1px solid #374151;
+  background: #181c23;
+  color: #e5e7eb;
+  font-size: 1rem;
+}
+.nueva-solicitud-form button {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.2rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background 0.2s;
+}
+.nueva-solicitud-form button:disabled {
+  background: #334155;
+  cursor: not-allowed;
+}
+.nueva-solicitud-form button:hover:not(:disabled) {
+  background: #1d4ed8;
 }
 
 .logo {
