@@ -15,9 +15,9 @@
 default: &default
   adapter: postgresql
   encoding: unicode
-  host: localhost     # ← Esto es clave: fuerza TCP en lugar de socket
+  host: <%= ENV.fetch("DB_HOST", "localhost") %>
   username: gestor_firmas_back
-  password: vodka29,  # La misma que usaste al crear el usuario
+  password: <%= ENV.fetch("GESTOR_FIRMAS_BACK_DATABASE_PASSWORD") { "vodka29," } %>
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
 
@@ -80,20 +80,5 @@ test:
 # for a full overview on how database connection configuration can be specified.
 #
 production:
-  primary: &primary_production
-    <<: *default
-    database: gestor_firmas_back_production
-    username: gestor_firmas_back
-    password: <%= ENV["GESTOR_FIRMAS_BACK_DATABASE_PASSWORD"] %>
-  cache:
-    <<: *primary_production
-    database: gestor_firmas_back_production_cache
-    migrations_paths: db/cache_migrate
-  queue:
-    <<: *primary_production
-    database: gestor_firmas_back_production_queue
-    migrations_paths: db/queue_migrate
-  cable:
-    <<: *primary_production
-    database: gestor_firmas_back_production_cable
-    migrations_paths: db/cable_migrate
+  <<: *default
+  database: gestor_firmas_back_production

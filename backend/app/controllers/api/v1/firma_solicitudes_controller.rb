@@ -46,7 +46,7 @@ class Api::V1::FirmaSolicitudesController < ApplicationController
       return render json: { error: 'Solo el firmante puede actualizar el estado' }, status: :forbidden
     end
 
-    estado = params[:estado] || params.dig(:firma_solicitude, :estado)
+    estado = params[:estado] || params.dig(:firma_solicitud, :estado)
     
     if estado.present? && FirmaSolicitud.estado_firmas.keys.include?(estado)
       solicitud.estado_firma = estado
