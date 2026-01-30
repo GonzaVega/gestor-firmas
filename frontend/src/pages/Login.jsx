@@ -1,32 +1,42 @@
-import { GoogleLogin } from '@react-oauth/google';
-import axiosInstance from '../api/axiosInstance';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { GoogleLogin } from "@react-oauth/google";
+import axiosInstance from "../api/axiosInstance";
+import { useAuth } from "../context/useAuth";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  // Mantener la lógica de autenticación igual, solo se elimina el selector visual de rol
   const handleSuccess = async (credentialResponse) => {
     try {
-      const res = await axiosInstance.post('/auth/google', {
+      const res = await axiosInstance.post("/auth/google", {
         id_token: credentialResponse.credential,
       });
       login(res.data.jwt, res.data.user);
-      if (res.data.user.rol === 'Fiscal' || res.data.user.rol === 'Fiscal Jefe' || res.data.user.rol === 'Ayudante Fiscal') {
-        navigate('/firmante');
+      // Redirigir según el rol recibido
+      if (res.data.user.rol === "firmante") {
+        navigate("/firmante");
       } else {
-        navigate('/solicitante');
+        navigate("/solicitante");
       }
     } catch (err) {
-      alert('Error de autenticación');
+      alert("Error de autenticación");
     }
   };
 
   return (
-    <div className="login-page">
-      <h2>Iniciar sesión</h2>
-      <GoogleLogin onSuccess={handleSuccess} onError={() => alert('Error de Google Login')} />
+    <div className="login-bg">
+      <div className="login-card login-card-custom">
+        <h1 className="app-title-login">Gestor de Firmas</h1>
+        <h2 className="login-title">Iniciar sesión</h2>
+        <div className="login-google-wrapper">
+          <GoogleLogin
+            onSuccess={handleSuccess}
+            onError={() => alert("Error de Google Login")}
+          />
+        </div>
+      </div>
     </div>
   );
 }
