@@ -2,11 +2,15 @@ import { useEffect, useState } from "react";
 import axiosInstance from "../api/axiosInstance";
 import FirmaCard from "../components/FirmaCard";
 import { useAuth } from "../context/useAuth";
+import ExpedienteSearch from "../components/ExpedienteSearch";
+import { filterByExpediente } from "../utils/filterExpedientes";
 
 function DashboardFirmante() {
   const [solicitudes, setSolicitudes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
+  const [busquedaPendientes, setBusquedaPendientes] = useState("");
+  const [busquedaProcesadas, setBusquedaProcesadas] = useState("");
   const { user } = useAuth();
 
   const showToast = (type, msg) => {
@@ -66,18 +70,31 @@ function DashboardFirmante() {
   if (loading) return <div>Cargando...</div>;
 
   // Ordenar: pendientes primero (más recientes arriba), luego el resto
-  const pendientes = solicitudes
+  const pendientesBase = solicitudes
     .filter((s) => (s.estado_firma || s.estado) === "pendiente")
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  const noPendientes = solicitudes
+  const noPendientesBase = solicitudes
     .filter((s) => (s.estado_firma || s.estado) !== "pendiente")
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+  const pendientes = filterByExpediente(pendientesBase, busquedaPendientes);
+  const noPendientes = filterByExpediente(noPendientesBase, busquedaProcesadas);
   const hayPendientes = pendientes.length > 0;
+  const hayPendientesBase = pendientesBase.length > 0;
+  const hayNoPendientesBase = noPendientesBase.length > 0;
 
   return (
     <div className="dashboard-firmante">
       <h2 style={{ paddingLeft: "2rem" }}>Solicitudes para firmar</h2>
-      {!hayPendientes && (
+      <div style={{ paddingLeft: "2rem", paddingRight: "2rem" }}>
+        <ExpedienteSearch
+          value={busquedaPendientes}
+          onChange={setBusquedaPendientes}
+          placeholder="Buscar por expediente..."
+          hidden={!hayPendientesBase}
+        />
+      </div>
+      {!hayPendientes && hayPendientesBase && (
         <div className="empty-list" style={{ marginLeft: "2rem" }}>
           No hay solicitudes pendientes para firmar.
         </div>
@@ -102,11 +119,19 @@ function DashboardFirmante() {
       <h2 style={{ paddingLeft: "2rem", marginTop: "2rem" }}>
         Solicitudes firmadas / rechazadas
       </h2>
-      {noPendientes.length === 0 ? (
+      <div style={{ paddingLeft: "2rem", paddingRight: "2rem" }}>
+        <ExpedienteSearch
+          value={busquedaProcesadas}
+          onChange={setBusquedaProcesadas}
+          placeholder="Buscar por expediente..."
+          hidden={!hayNoPendientesBase}
+        />
+      </div>
+      {noPendientes.length === 0 && hayNoPendientesBase ? (
         <div className="empty-list" style={{ marginLeft: "2rem" }}>
           No hay sin procesar.
         </div>
-      ) : (
+      ) : noPendientes.length > 0 ? (
         <div
           className="firmante-list"
           style={{ paddingLeft: "2rem", paddingRight: "2rem" }}
@@ -120,7 +145,7 @@ function DashboardFirmante() {
             />
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

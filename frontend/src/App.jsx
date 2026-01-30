@@ -18,7 +18,7 @@ function AppContent() {
   return (
     <>
       {!hideNavbar && <Header />}
-      <div className="main-content">
+      <div className={`main-content ${hideNavbar ? "no-header" : ""}`}>
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />

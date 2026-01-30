@@ -570,6 +570,13 @@ body {
   box-sizing: border-box;
   overflow-x: hidden;
 }
+.main-content.no-header {
+  padding: 0;
+  min-height: 100vh;
+  max-width: none;
+  width: 100%;
+  background: linear-gradient(135deg, #232526 0%, #414345 100%);
+}
 
 .dashboard-solicitante,
 .dashboard-firmante {
@@ -910,6 +917,45 @@ body {
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Buscador de expedientes */
+.section-header-search {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  padding: 10px 16px;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 320px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  background-color: #181c23;
+  color: #e5e7eb;
+}
+
+.expediente-search {
+  width: 100%;
+  max-width: 320px;
+  margin: 0 0 1rem 0;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+@media (max-width: 600px) {
+  .search-input {
+    max-width: 100%;
   }
 }
 
