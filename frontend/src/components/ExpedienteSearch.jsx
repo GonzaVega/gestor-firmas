@@ -1,6 +1,11 @@
 import React from "react";
 
-export default function ExpedienteSearch({ value, onChange, placeholder, hidden }) {
+export default function ExpedienteSearch({
+  value,
+  onChange,
+  placeholder,
+  hidden,
+}) {
   if (hidden) return null;
   return (
     <div className="expediente-search">

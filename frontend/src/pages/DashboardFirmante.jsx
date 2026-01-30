@@ -35,7 +35,9 @@ function DashboardFirmante() {
   const handleFirmar = async (id) => {
     try {
       await axiosInstance.patch(`/firma_solicitudes/${id}`, {
+        estado_firma: "firmado",
         estado: "firmado",
+        firma_solicitud: { estado_firma: "firmado" },
       });
       setSolicitudes((solicitudes) =>
         solicitudes.map((s) =>
@@ -52,7 +54,9 @@ function DashboardFirmante() {
   const handleRechazar = async (id) => {
     try {
       await axiosInstance.patch(`/firma_solicitudes/${id}`, {
+        estado_firma: "rechazado",
         estado: "rechazado",
+        firma_solicitud: { estado_firma: "rechazado" },
       });
       setSolicitudes((solicitudes) =>
         solicitudes.map((s) =>

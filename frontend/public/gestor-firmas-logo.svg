@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Fondo circular para visibilidad en pestañas -->
+  <circle cx="32" cy="32" r="30" fill="#2563eb" />
+  
+  <!-- Documento -->
+  <path d="M22 18H38L46 26V46C46 47.1 45.1 48 44 48H22C20.9 48 20 47.1 20 46V20C20 18.9 20.9 18 22 18Z" fill="white" />
+  <path d="M38 18V26H46L38 18Z" fill="#dbeafe" />
+  
+  <!-- Líneas de texto/documento -->
+  <rect x="25" y="30" width="14" height="2" rx="1" fill="#94a3b8" />
+  <rect x="25" y="35" width="10" height="2" rx="1" fill="#94a3b8" />
+  
+  <!-- Pluma de firma Estilizada -->
+  <path d="M48 42L41 49L38 46" stroke="#10b981" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Brillo sutil -->
+  <circle cx="20" cy="20" r="10" fill="white" fill-opacity="0.1" />
+</svg>

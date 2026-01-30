@@ -61,8 +61,14 @@ function DashboardSolicitante() {
     (s) => (s.estado_firma || s.estado) !== "pendiente",
   );
 
-  const pendientesFiltradas = filterByExpediente(pendientes, busquedaPendientes);
-  const realizadasFiltradas = filterByExpediente(realizadas, busquedaRealizadas);
+  const pendientesFiltradas = filterByExpediente(
+    pendientes,
+    busquedaPendientes,
+  );
+  const realizadasFiltradas = filterByExpediente(
+    realizadas,
+    busquedaRealizadas,
+  );
 
   return (
     <div className="dashboard-solicitante">
