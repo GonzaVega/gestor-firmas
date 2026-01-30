@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_06_212637) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_26_211022) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -21,18 +21,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_06_212637) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "firma_solicituds", force: :cascade do |t|
+  create_table "firma_solicitudes", force: :cascade do |t|
     t.integer "solicitante_id", null: false
     t.integer "firmante_id", null: false
     t.integer "expediente_id", null: false
     t.json "documentos", null: false
     t.text "comentario"
-    t.integer "estado", default: 0, null: false
+    t.integer "estado_firma", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["expediente_id"], name: "index_firma_solicituds_on_expediente_id"
-    t.index ["firmante_id"], name: "index_firma_solicituds_on_firmante_id"
-    t.index ["solicitante_id"], name: "index_firma_solicituds_on_solicitante_id"
+    t.index ["expediente_id"], name: "index_firma_solicitudes_on_expediente_id"
+    t.index ["firmante_id"], name: "index_firma_solicitudes_on_firmante_id"
+    t.index ["solicitante_id"], name: "index_firma_solicitudes_on_solicitante_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -51,7 +51,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_06_212637) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
-  add_foreign_key "firma_solicituds", "expedientes"
-  add_foreign_key "firma_solicituds", "users", column: "firmante_id"
-  add_foreign_key "firma_solicituds", "users", column: "solicitante_id"
+  add_foreign_key "firma_solicitudes", "expedientes"
+  add_foreign_key "firma_solicitudes", "users", column: "firmante_id"
+  add_foreign_key "firma_solicitudes", "users", column: "solicitante_id"
 end

@@ -1,6 +1,6 @@
 class Api::V1::AuthController < ApplicationController
   require 'jwt'
-  skip_before_action :verify_authenticity_token
+  # skip_before_action :verify_authenticity_token
 
   # POST /api/v1/auth/google
   def google

@@ -2,7 +2,7 @@ class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable
+         :recoverable, :rememberable, :validatable,
          :omniauthable, omniauth_providers: [:google_oauth2]
 
   def self.from_google(id_token_info)
@@ -10,7 +10,7 @@ class User < ApplicationRecord
     user.nombre = id_token_info['name'] if user.nombre.blank?
     user.provider = 'google_oauth2'
     user.uid = id_token_info['sub']
-    user.rol ||= 'Fiscal' # Rol por defecto, puede cambiarse luego
+    user.rol ||= 'Fiscal' # Rol por defecto
     user.password = Devise.friendly_token[0, 20] if user.encrypted_password.blank?
     user.save!
     user

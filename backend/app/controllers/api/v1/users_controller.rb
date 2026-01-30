@@ -7,6 +7,16 @@ class Api::V1::UsersController < ApplicationController
     render json: users
   end
 
+  # GET /api/v1/users/me
+  def me
+    render json: {
+      id: current_user.id,
+      email: current_user.email,
+      nombre: current_user.nombre,
+      rol: current_user.rol
+    }
+  end
+
   # PATCH /api/v1/users/:id
   def update
     user = User.find(params[:id])
