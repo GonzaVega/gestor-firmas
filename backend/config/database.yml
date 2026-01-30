@@ -80,5 +80,9 @@ test:
 # for a full overview on how database connection configuration can be specified.
 #
 production:
-  <<: *default
-  database: gestor_firmas_back_production
+  primary: &primary_production
+    <<: *default
+    url: <%= ENV.fetch("DATABASE_URL") %>
+  cache: *primary_production
+  queue: *primary_production
+  cable: *primary_production
