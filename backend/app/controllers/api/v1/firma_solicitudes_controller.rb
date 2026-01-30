@@ -3,12 +3,20 @@ class Api::V1::FirmaSolicitudesController < ApplicationController
 
   # GET /api/v1/firma_solicitudes
   def index
-    solicitudes = if current_user.solicitudes_recibidas.exists?
-      current_user.solicitudes_recibidas.includes(:expediente, :solicitante)
-    else
-      current_user.solicitudes_enviadas.includes(:expediente, :firmante)
-    end
-    render json: solicitudes.as_json(include: [:expediente, :solicitante, :firmante])
+    # Obtener todas las solicitudes relacionadas con el usuario en una sola consulta
+    ids_solicitudes = FirmaSolicitud
+      .where('solicitante_id = :user_id OR firmante_id = :user_id', user_id: current_user.id)
+      .pluck(:id)
+      .uniq
+
+    todas_solicitudes = FirmaSolicitud
+      .includes(:expediente, :solicitante, :firmante)
+      .where(id: ids_solicitudes)
+      .order(created_at: :desc)
+
+    render json: todas_solicitudes.as_json(
+      include: [:expediente, :solicitante, :firmante]
+    )
   end
 
   # POST /api/v1/firma_solicitudes
@@ -22,7 +30,7 @@ class Api::V1::FirmaSolicitudesController < ApplicationController
       expediente: expediente,
       documentos: params[:documentos],
       comentario: params[:comentario],
-      estado: :pendiente
+      estado_firma: :pendiente
     )
     if solicitud.save
       render json: solicitud.as_json(include: [:expediente, :firmante]), status: :created
@@ -37,12 +45,16 @@ class Api::V1::FirmaSolicitudesController < ApplicationController
     unless solicitud.firmante_id == current_user.id
       return render json: { error: 'Solo el firmante puede actualizar el estado' }, status: :forbidden
     end
-    if params[:estado].present? && FirmaSolicitud.estados.keys.include?(params[:estado])
-      solicitud.estado = params[:estado]
+
+    estado = params[:estado] || params.dig(:firma_solicitude, :estado)
+    
+    if estado.present? && FirmaSolicitud.estado_firmas.keys.include?(estado)
+      solicitud.estado_firma = estado
       solicitud.save!
-      render json: solicitud
+      render json: solicitud.as_json(include: [:expediente, :firmante, :solicitante])
     else
-      render json: { error: 'Estado inválido' }, status: :unprocessable_entity
+      render json: { error: 'Estado inválido. Los estados válidos son: ' + FirmaSolicitud.estado_firmas.keys.join(', ') }, 
+             status: :unprocessable_entity
     end
   end
 end
