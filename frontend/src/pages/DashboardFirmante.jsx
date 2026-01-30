@@ -9,6 +9,11 @@ function DashboardFirmante() {
   const [toast, setToast] = useState(null);
   const { user } = useAuth();
 
+  const showToast = (type, msg) => {
+    setToast({ type, msg });
+    setTimeout(() => setToast(null), 2000);
+  };
+
   useEffect(() => {
     axiosInstance
       .get("/firma_solicitudes")
@@ -24,30 +29,38 @@ function DashboardFirmante() {
   }, [user]);
 
   const handleFirmar = async (id) => {
-    await axiosInstance.patch(`/firma_solicitudes/${id}`, {
-      estado: "firmado",
-    });
-    setSolicitudes((solicitudes) =>
-      solicitudes.map((s) =>
-        s.id === id ? { ...s, estado: "firmado", estado_firma: "firmado" } : s,
-      ),
-    );
-    setToast({ type: "success", msg: "Solicitud firmada correctamente" });
-    setTimeout(() => setToast(null), 2000);
+    try {
+      await axiosInstance.patch(`/firma_solicitudes/${id}`, {
+        estado: "firmado",
+      });
+      setSolicitudes((solicitudes) =>
+        solicitudes.map((s) =>
+          s.id === id
+            ? { ...s, estado: "firmado", estado_firma: "firmado" }
+            : s,
+        ),
+      );
+      showToast("success", "Solicitud firmada correctamente");
+    } catch (error) {
+      showToast("error", "No se pudo firmar la solicitud");
+    }
   };
   const handleRechazar = async (id) => {
-    await axiosInstance.patch(`/firma_solicitudes/${id}`, {
-      estado: "rechazado",
-    });
-    setSolicitudes((solicitudes) =>
-      solicitudes.map((s) =>
-        s.id === id
-          ? { ...s, estado: "rechazado", estado_firma: "rechazado" }
-          : s,
-      ),
-    );
-    setToast({ type: "error", msg: "Solicitud rechazada correctamente" });
-    setTimeout(() => setToast(null), 2000);
+    try {
+      await axiosInstance.patch(`/firma_solicitudes/${id}`, {
+        estado: "rechazado",
+      });
+      setSolicitudes((solicitudes) =>
+        solicitudes.map((s) =>
+          s.id === id
+            ? { ...s, estado: "rechazado", estado_firma: "rechazado" }
+            : s,
+        ),
+      );
+      showToast("error", "Solicitud rechazada correctamente");
+    } catch (error) {
+      showToast("error", "No se pudo rechazar la solicitud");
+    }
   };
 
   if (loading) return <div>Cargando...</div>;
@@ -59,8 +72,6 @@ function DashboardFirmante() {
   const noPendientes = solicitudes
     .filter((s) => (s.estado_firma || s.estado) !== "pendiente")
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  const ordenadas = [...pendientes, ...noPendientes];
-
   const hayPendientes = pendientes.length > 0;
 
   return (

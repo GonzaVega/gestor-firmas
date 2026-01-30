@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/useAuth";
 import axiosInstance from "../api/axiosInstance";
 
@@ -7,12 +7,15 @@ export function RoleSelector() {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef(null);
 
   useEffect(() => {
     loadRoles();
     const handleClickOutside = (event) => {
-      const dropdown = document.querySelector(".custom-select");
-      if (dropdown && !dropdown.contains(event.target)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
         setIsOpen(false);
       }
     };
@@ -49,7 +52,7 @@ export function RoleSelector() {
   if (!user) return null;
 
   return (
-    <div className="custom-select">
+    <div className="custom-select" ref={containerRef}>
       <button
         type="button"
         className="role-selector"

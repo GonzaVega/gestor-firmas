@@ -29,8 +29,23 @@ function DashboardSolicitante() {
     fetchSolicitudes();
   }, [fetchSolicitudes]);
 
-  const handleNueva = () => {
-    fetchSolicitudes();
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchSolicitudes();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [fetchSolicitudes]);
+
+  const handleNueva = (nueva) => {
+    if (nueva) {
+      setSolicitudes((prev) => [nueva, ...prev]);
+    }
     setToast({ type: "success", msg: "Solicitud creada correctamente" });
     setTimeout(() => setToast(null), 2000);
   };

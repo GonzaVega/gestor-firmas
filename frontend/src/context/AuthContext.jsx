@@ -5,9 +5,20 @@ export const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     const stored = localStorage.getItem("user");
-    return stored ? JSON.parse(stored) : null;
+    if (!stored) return null;
+    try {
+      return JSON.parse(stored);
+    } catch (error) {
+      localStorage.removeItem("user");
+      return null;
+    }
   });
   const [jwt, setJwt] = useState(() => localStorage.getItem("jwt"));
+  const [initialized, setInitialized] = useState(false);
+
+  useEffect(() => {
+    setInitialized(true);
+  }, []);
 
   useEffect(() => {
     if (user) localStorage.setItem("user", JSON.stringify(user));
@@ -32,7 +43,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, jwt, login, logout }}>
+    <AuthContext.Provider value={{ user, jwt, login, logout, initialized }}>
       {children}
     </AuthContext.Provider>
   );

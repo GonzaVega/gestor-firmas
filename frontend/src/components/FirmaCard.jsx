@@ -1,10 +1,23 @@
-
 import classNames from "classnames";
 import { useState } from "react";
 
 function FirmaCard({ solicitud, onFirmar, onRechazar, esNueva }) {
   const estado = solicitud.estado_firma || solicitud.estado;
   const [showModal, setShowModal] = useState(false);
+  const documentos = solicitud.documentos;
+  const tieneTodos = Array.isArray(documentos) && documentos.includes("*");
+  const documentosTexto = tieneTodos
+    ? estado === "pendiente"
+      ? "Firmar todos"
+      : estado === "rechazado" || estado === "rechazada"
+        ? "Firma rechazada"
+        : "Todos firmados"
+    : Array.isArray(documentos)
+      ? documentos.join(", ")
+      : JSON.stringify(documentos);
+  const updatedAtTexto = solicitud.updated_at
+    ? `${new Date(solicitud.updated_at).toLocaleDateString("es-AR")} ${new Date(solicitud.updated_at).toLocaleTimeString("es-AR", { hour12: false })} hs.`
+    : null;
 
   return (
     <>
@@ -33,10 +46,8 @@ function FirmaCard({ solicitud, onFirmar, onRechazar, esNueva }) {
             <div>{solicitud.solicitante?.nombre}</div>
           </div>
           <div className="firma-card-col documentos">
-            <b>Documentos:</b>{" "}
-            {Array.isArray(solicitud.documentos)
-              ? solicitud.documentos.join(", ")
-              : JSON.stringify(solicitud.documentos)}
+            <b>Documentos:</b>
+            <div style={{ fontStyle: "italic" }}>{documentosTexto}</div>
           </div>
           <div className={classNames("firma-card-col estado", estado)}>
             <span>{estado.charAt(0).toUpperCase() + estado.slice(1)}</span>
@@ -47,9 +58,17 @@ function FirmaCard({ solicitud, onFirmar, onRechazar, esNueva }) {
             <b>Comentario:</b> {solicitud.comentario}
           </div>
         )}
+        {updatedAtTexto && (
+          <div className="comentario">
+            <b>Última modificación:</b> {updatedAtTexto}
+          </div>
+        )}
         {onFirmar && onRechazar && estado === "pendiente" && (
-          <div className="acciones" onClick={e => e.stopPropagation()}>
-            <button className="btn-firmar" onClick={() => onFirmar(solicitud.id)}>
+          <div className="acciones" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="btn-firmar"
+              onClick={() => onFirmar(solicitud.id)}
+            >
               Firmar
             </button>
             <button
@@ -62,36 +81,78 @@ function FirmaCard({ solicitud, onFirmar, onRechazar, esNueva }) {
         )}
       </div>
       {showModal && (
-        <div className="modal-firma-overlay" onClick={() => setShowModal(false)}>
-          <div className={`modal-firma modal-firma-centered modal-firma-${estado}`} style={{color: '#fff'}} onClick={e => e.stopPropagation()}>
-            <div style={{marginBottom: '1.5rem', textAlign: 'center'}}>
-              <div style={{fontSize: '1.2rem', fontWeight: 700, marginBottom: 6}}>Expediente</div>
-              <div style={{fontSize: '1.7rem', fontWeight: 800, marginBottom: 10}}>{solicitud.expediente?.numero}</div>
+        <div
+          className="modal-firma-overlay"
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            className={`modal-firma modal-firma-centered modal-firma-${estado}`}
+            style={{ color: "#fff" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ marginBottom: "1.5rem", textAlign: "center" }}>
+              <div
+                style={{ fontSize: "1.2rem", fontWeight: 700, marginBottom: 6 }}
+              >
+                Expediente
+              </div>
+              <div
+                style={{
+                  fontSize: "1.7rem",
+                  fontWeight: 800,
+                  marginBottom: 10,
+                }}
+              >
+                {solicitud.expediente?.numero}
+              </div>
             </div>
-            <div style={{marginBottom: 18, display: 'flex', justifyContent: 'center'}}>
+            <div
+              style={{
+                marginBottom: 18,
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
               <div className={`modal-estado-box ${estado}`}>
                 {estado.charAt(0).toUpperCase() + estado.slice(1)}
               </div>
             </div>
-            <div style={{marginBottom: 8, textAlign: 'center'}}>
-              <span style={{fontWeight: 600}}>Documentos: </span>
-              <span>{Array.isArray(solicitud.documentos) ? solicitud.documentos.join(", ") : JSON.stringify(solicitud.documentos)}</span>
+            <div style={{ marginBottom: 8, textAlign: "center" }}>
+              <span style={{ fontWeight: 600 }}>Documentos: </span>
+              <div style={{ fontStyle: "italic" }}>{documentosTexto}</div>
             </div>
-            <div style={{marginBottom: 8, textAlign: 'center'}}>
-              <span style={{fontWeight: 600}}>Firmante: </span>
+            <div style={{ marginBottom: 8, textAlign: "center" }}>
+              <span style={{ fontWeight: 600 }}>Firmante: </span>
               <span>{solicitud.firmante?.nombre}</span>
             </div>
-            <div style={{marginBottom: 8, textAlign: 'center'}}>
-              <span style={{fontWeight: 600}}>Solicitante: </span>
+            <div style={{ marginBottom: 8, textAlign: "center" }}>
+              <span style={{ fontWeight: 600 }}>Solicitante: </span>
               <span>{solicitud.solicitante?.nombre}</span>
             </div>
             {solicitud.comentario && (
-              <div className="comentario" style={{margin: '0 auto 8px auto', textAlign: 'left'}}>
+              <div
+                className="comentario"
+                style={{ margin: "0 auto 8px auto", textAlign: "left" }}
+              >
                 <b>Comentario:</b> {solicitud.comentario}
               </div>
             )}
-            <div style={{textAlign: 'center'}}>
-              <button className="btn-navbar" style={{marginTop: 20}} onClick={() => setShowModal(false)}>Cerrar</button>
+            {updatedAtTexto && (
+              <div
+                className="comentario"
+                style={{ margin: "0 auto 8px auto", textAlign: "left" }}
+              >
+                <b>Última modificación:</b> {updatedAtTexto}
+              </div>
+            )}
+            <div style={{ textAlign: "center" }}>
+              <button
+                className="btn-navbar"
+                style={{ marginTop: 20 }}
+                onClick={() => setShowModal(false)}
+              >
+                Cerrar
+              </button>
             </div>
           </div>
         </div>

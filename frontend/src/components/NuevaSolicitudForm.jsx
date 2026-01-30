@@ -6,6 +6,7 @@ function NuevaSolicitudForm({ onNueva }) {
   const [firmanteId, setFirmanteId] = useState("");
   const [expedienteNumero, setExpedienteNumero] = useState("");
   const [documentos, setDocumentos] = useState("");
+  const [todosLosDocumentos, setTodosLosDocumentos] = useState(false);
   const [comentario, setComentario] = useState("");
   const [loading, setLoading] = useState(false);
   const [expedienteError, setExpedienteError] = useState("");
@@ -38,13 +39,19 @@ function NuevaSolicitudForm({ onNueva }) {
       const res = await axiosInstance.post("/firma_solicitudes", {
         firmante_id: firmanteId,
         expediente_numero: `P-${expedienteNumero}`,
-        documentos: documentos.split(",").map((d) => d.trim()),
+        documentos: todosLosDocumentos
+          ? ["*"]
+          : documentos
+              .split(",")
+              .map((d) => d.trim())
+              .filter(Boolean),
         comentario,
       });
       onNueva && onNueva(res.data);
       setFirmanteId("");
       setExpedienteNumero("");
       setDocumentos("");
+      setTodosLosDocumentos(false);
       setComentario("");
     } catch (err) {
       alert("Error al crear solicitud");
@@ -68,24 +75,40 @@ function NuevaSolicitudForm({ onNueva }) {
           </option>
         ))}
       </select>
-      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-        <span style={{ fontWeight: "bold" }}>P-</span>
+      <div className="input-prefix" data-prefix="P-">
         <input
+          className="prefix-input"
           value={expedienteNumero}
           onChange={handleExpedienteChange}
           placeholder="######/##"
           required
-          style={{ flex: 1 }}
           maxLength={9}
         />
       </div>
       {expedienteError && <div style={{ color: "red" }}>{expedienteError}</div>}
-      <input
-        value={documentos}
-        onChange={(e) => setDocumentos(e.target.value)}
-        placeholder="Documentos (separados por coma)"
-        required
-      />
+      <label className="toggle-row">
+        <span>Firmar todos los documentos</span>
+        <span className="toggle-switch">
+          <input
+            type="checkbox"
+            checked={todosLosDocumentos}
+            onChange={(e) => setTodosLosDocumentos(e.target.checked)}
+          />
+          <span className="toggle-slider" />
+        </span>
+      </label>
+      <div
+        className={`documentos-field ${todosLosDocumentos ? "is-hidden" : "is-visible"}`}
+        aria-hidden={todosLosDocumentos}
+      >
+        <input
+          value={documentos}
+          onChange={(e) => setDocumentos(e.target.value)}
+          placeholder="Documentos (separados por coma)"
+          required={!todosLosDocumentos}
+          disabled={todosLosDocumentos}
+        />
+      </div>
       <input
         value={comentario}
         onChange={(e) => setComentario(e.target.value)}
