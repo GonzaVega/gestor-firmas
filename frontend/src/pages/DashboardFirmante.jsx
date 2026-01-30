@@ -89,67 +89,52 @@ function DashboardFirmante() {
 
   return (
     <div className="dashboard-firmante">
-      <h2 style={{ paddingLeft: "2rem" }}>Solicitudes para firmar</h2>
-      <div style={{ paddingLeft: "2rem", paddingRight: "2rem" }}>
+      {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
+      <div className="firmante-list-section">
+        <h2>Solicitudes pendientes</h2>
         <ExpedienteSearch
           value={busquedaPendientes}
           onChange={setBusquedaPendientes}
           placeholder="Buscar por expediente..."
           hidden={!hayPendientesBase}
         />
-      </div>
-      {!hayPendientes && hayPendientesBase && (
-        <div className="empty-list" style={{ marginLeft: "2rem" }}>
-          No hay solicitudes pendientes para firmar.
-        </div>
-      )}
-      {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
-      {hayPendientes && (
-        <div
-          className="firmante-list"
-          style={{ paddingLeft: "2rem", paddingRight: "2rem" }}
-        >
-          {pendientes.map((s) => (
-            <FirmaCard
-              key={s.id}
-              solicitud={s}
-              onFirmar={handleFirmar}
-              onRechazar={handleRechazar}
-            />
-          ))}
-        </div>
-      )}
+        {pendientes.length === 0 ? (
+          <div className="empty-list">No hay solicitudes pendientes.</div>
+        ) : (
+          <div className="firmante-list">
+            {pendientes.map((s) => (
+              <FirmaCard
+                key={s.id}
+                solicitud={s}
+                onFirmar={handleFirmar}
+                onRechazar={handleRechazar}
+              />
+            ))}
+          </div>
+        )}
 
-      <h2 style={{ paddingLeft: "2rem", marginTop: "2rem" }}>
-        Solicitudes firmadas / rechazadas
-      </h2>
-      <div style={{ paddingLeft: "2rem", paddingRight: "2rem" }}>
+        <h2>Solicitudes realizadas</h2>
         <ExpedienteSearch
           value={busquedaProcesadas}
           onChange={setBusquedaProcesadas}
           placeholder="Buscar por expediente..."
           hidden={!hayNoPendientesBase}
         />
+        {noPendientes.length === 0 ? (
+          <div className="empty-list">No hay solicitudes realizadas.</div>
+        ) : (
+          <div className="firmante-list">
+            {noPendientes.map((s) => (
+              <FirmaCard
+                key={s.id}
+                solicitud={s}
+                onFirmar={handleFirmar}
+                onRechazar={handleRechazar}
+              />
+            ))}
+          </div>
+        )}
       </div>
-      {noPendientes.length === 0 && hayNoPendientesBase ? (
-        <div className="empty-list" style={{ marginLeft: "2rem" }}>
-          No hay sin procesar.
-        </div>
-      ) : noPendientes.length > 0 ? (
-        <div
-          className="firmante-list"
-          style={{ paddingLeft: "2rem", paddingRight: "2rem" }}
-        >
-          {noPendientes.map((s) => (
-            <FirmaCard
-              key={s.id}
-              solicitud={s}
-              onFirmar={handleFirmar}
-              onRechazar={handleRechazar}
-            />
-          ))}
-        </div>
-      ) : null}
     </div>
   );
 }

@@ -619,11 +619,13 @@ body {
   padding: 1.5rem 2rem;
 }
 
-.solicitante-list-section {
+.solicitante-list-section,
+.firmante-list-section {
   padding: 0 2rem;
 }
 
-.solicitante-list-section h2 {
+.solicitante-list-section h2,
+.firmante-list-section h2 {
   margin-top: 2rem;
   color: #60a5fa;
 }
