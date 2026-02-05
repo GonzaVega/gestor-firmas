@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  expediente: MyString
+  descripcion: MyText
+  fecha_limite: 2026-02-04 22:59:02
+  estado: MyString
+  created_by: one
+
+two:
+  expediente: MyString
+  descripcion: MyText
+  fecha_limite: 2026-02-04 22:59:02
+  estado: MyString
+  created_by: two

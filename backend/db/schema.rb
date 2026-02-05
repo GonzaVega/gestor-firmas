@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_26_211022) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_05_015904) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -35,6 +35,38 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_26_211022) do
     t.index ["solicitante_id"], name: "index_firma_solicitudes_on_solicitante_id"
   end
 
+  create_table "notes", force: :cascade do |t|
+    t.string "expediente"
+    t.text "contenido"
+    t.string "estado", default: "no_leida"
+    t.bigint "remitente_id", null: false
+    t.bigint "destinatario_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["destinatario_id"], name: "index_notes_on_destinatario_id"
+    t.index ["remitente_id"], name: "index_notes_on_remitente_id"
+  end
+
+  create_table "task_assignments", force: :cascade do |t|
+    t.bigint "task_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["task_id"], name: "index_task_assignments_on_task_id"
+    t.index ["user_id"], name: "index_task_assignments_on_user_id"
+  end
+
+  create_table "tasks", force: :cascade do |t|
+    t.string "expediente"
+    t.text "descripcion"
+    t.datetime "fecha_limite"
+    t.string "estado", default: "pendiente"
+    t.bigint "created_by_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_tasks_on_created_by_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -54,4 +86,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_26_211022) do
   add_foreign_key "firma_solicitudes", "expedientes"
   add_foreign_key "firma_solicitudes", "users", column: "firmante_id"
   add_foreign_key "firma_solicitudes", "users", column: "solicitante_id"
+  add_foreign_key "notes", "users", column: "destinatario_id"
+  add_foreign_key "notes", "users", column: "remitente_id"
+  add_foreign_key "task_assignments", "tasks"
+  add_foreign_key "task_assignments", "users"
+  add_foreign_key "tasks", "users", column: "created_by_id"
 end

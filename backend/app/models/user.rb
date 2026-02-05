@@ -19,6 +19,12 @@ class User < ApplicationRecord
   has_many :solicitudes_enviadas, class_name: 'FirmaSolicitud', foreign_key: 'solicitante_id', dependent: :nullify
   has_many :solicitudes_recibidas, class_name: 'FirmaSolicitud', foreign_key: 'firmante_id', dependent: :nullify
 
+  has_many :notas_enviadas, class_name: 'Note', foreign_key: 'remitente_id', dependent: :destroy
+  has_many :notas_recibidas, class_name: 'Note', foreign_key: 'destinatario_id', dependent: :destroy
+  has_many :tareas_creadas, class_name: 'Task', foreign_key: 'created_by_id', dependent: :destroy
+  has_many :task_assignments, dependent: :destroy
+  has_many :tareas_asignadas, through: :task_assignments, source: :task
+
   validates :email, presence: true, uniqueness: true
   validates :nombre, presence: true
   validates :rol, presence: true

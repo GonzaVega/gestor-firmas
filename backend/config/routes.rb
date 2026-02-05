@@ -11,6 +11,8 @@ Rails.application.routes.draw do
         end
       end
       resources :firma_solicitudes, only: [:index, :create, :update]
+      resources :tareas, only: [:index, :create, :update]
+      resources :notas, only: [:index, :create, :update]
       resources :roles, only: [:index]
     end
   end
