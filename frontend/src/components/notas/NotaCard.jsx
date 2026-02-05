@@ -17,7 +17,6 @@ function NotaCard({ nota, onMarcarLeida, isReceptor }) {
 
   const isNoLeida = estado === "no_leida";
 
-  // Usaremos clases de FirmaCard pero ajustando lógica
   const estadoVisual = isNoLeida ? "pendiente" : "firmado";
 
   const fechaCreacionTexto = created_at
@@ -132,7 +131,7 @@ function NotaCard({ nota, onMarcarLeida, isReceptor }) {
                 e.stopPropagation();
                 onMarcarLeida(id);
               }}
-              className="btn-firmar" // Usamos estilo de botón verde (firmar) para acción positiva
+              className="btn-firmar"
               style={{
                 background: "#22c55e",
                 color: "#fff",

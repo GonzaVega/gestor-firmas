@@ -22,8 +22,7 @@ function BandejaEntrada() {
   const [busquedaProcesadas, setBusquedaProcesadas] = useState("");
 
   const { user } = useAuth();
-  const { refreshCounts, counts } = useNotifications(); // Consumir counts directamente para el ModeSelector
-
+  const { refreshCounts, counts } = useNotifications();
   const showToast = (type, msg) => {
     setToast({ type, msg });
     setTimeout(() => setToast(null), 2000);
@@ -60,7 +59,6 @@ function BandejaEntrada() {
     axiosInstance
       .get("/notas")
       .then((res) => {
-        // Notas donde soy destinatario
         const data = res.data.filter(
           (n) => String(n.destinatario_id) === String(user?.id),
         );
@@ -78,7 +76,6 @@ function BandejaEntrada() {
     if (mode === "notas") fetchNotas();
   }, [mode, fetchFirmas, fetchTareas, fetchNotas]);
 
-  // Actions Firmas
   const handleFirmar = async (id) => {
     try {
       await axiosInstance.patch(`/firma_solicitudes/${id}`, {
@@ -94,7 +91,7 @@ function BandejaEntrada() {
         ),
       );
       showToast("success", "Solicitud firmada correctamente");
-      refreshCounts(); // Actualizar contador global
+      refreshCounts();
     } catch (error) {
       showToast("error", "No se pudo firmar la solicitud");
     }
@@ -115,13 +112,12 @@ function BandejaEntrada() {
         ),
       );
       showToast("error", "Solicitud rechazada correctamente");
-      refreshCounts(); // Actualizar contador global
+      refreshCounts();
     } catch (error) {
       showToast("error", "No se pudo rechazar la solicitud");
     }
   };
 
-  // Actions Tareas
   const handleCompletarTarea = async (id) => {
     try {
       await axiosInstance.patch(`/tareas/${id}`, { estado: "completada" });
@@ -129,13 +125,12 @@ function BandejaEntrada() {
         prev.map((t) => (t.id === id ? { ...t, estado: "completada" } : t)),
       );
       showToast("success", "Tarea marcada como completada");
-      refreshCounts(); // Actualizar contador global
+      refreshCounts();
     } catch (error) {
       showToast("error", "Error al actualizar tarea");
     }
   };
 
-  // Actions Notas
   const handleLeerNota = async (id) => {
     try {
       await axiosInstance.patch(`/notas/${id}`, { estado: "leida" });
@@ -143,7 +138,7 @@ function BandejaEntrada() {
         prev.map((n) => (n.id === id ? { ...n, estado: "leida" } : n)),
       );
       showToast("success", "Nota marcada como leída");
-      refreshCounts(); // Actualizar contador global
+      refreshCounts();
     } catch (error) {
       showToast("error", "Error al actualizar nota");
     }
@@ -160,7 +155,6 @@ function BandejaEntrada() {
   let pendientesBase = [];
   let noPendientesBase = [];
   let PendienteComponent = null;
-  // let HistorialComponent = null;
 
   if (mode === "firmas") {
     pendientesBase = solicitudes
@@ -170,7 +164,6 @@ function BandejaEntrada() {
       .filter((s) => (s.estado_firma || s.estado) !== "pendiente")
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     PendienteComponent = FirmaCard;
-    // HistorialComponent = FirmaCard;
   } else if (mode === "tareas") {
     pendientesBase = tareas
       .filter((t) => t.estado === "pendiente")
@@ -179,9 +172,7 @@ function BandejaEntrada() {
       .filter((t) => t.estado !== "pendiente")
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     PendienteComponent = TareaCard;
-    // HistorialComponent = TareaCard;
   } else if (mode === "notas") {
-    // Pendientes = No Leidas
     pendientesBase = notas
       .filter((n) => n.estado === "no_leida")
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -189,7 +180,6 @@ function BandejaEntrada() {
       .filter((n) => n.estado !== "no_leida")
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     PendienteComponent = NotaCard;
-    // HistorialComponent = NotaCard;
   }
 
   const pendientes = filterByExpediente(pendientesBase, busquedaPendientes);

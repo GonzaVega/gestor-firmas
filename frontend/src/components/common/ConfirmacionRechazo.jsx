@@ -6,10 +6,10 @@ function ConfirmacionRechazo({ onConfirm, onCancel }) {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        background: "#ffeaea", // Light red background similar to 'rechazado' badge
+        background: "#ffeaea",
         padding: "8px 16px",
         borderRadius: "8px",
-        border: "1px solid #c00", // Red border
+        border: "1px solid #c00",
       }}
       onClick={(e) => e.stopPropagation()}
     >

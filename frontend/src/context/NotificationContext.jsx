@@ -22,12 +22,7 @@ export function NotificationProvider({ children }) {
   const fetchCounts = useCallback(async () => {
     if (!user) return;
 
-    // Si no es firmante, quizás no necesite ver badges en "Bandeja de Entrada".
-    // Pero el usuario pidió badges. Asumiremos que cualquier user puede tener cosas pendientes.
-    // Aunque el DashboardFirmante filtra por "firmante_id", "asignado_a", "destinatario_id".
-
     try {
-      // Ejecutamos en paralelo
       const [firmasRes, tareasRes, notasRes] = await Promise.allSettled([
         axiosInstance.get("/firma_solicitudes"),
         axiosInstance.get("/tareas"),
@@ -72,11 +67,9 @@ export function NotificationProvider({ children }) {
     }
   }, [user]);
 
-  // Cargar al inicio y cuando cambia el usuario
   useEffect(() => {
     if (user) {
       fetchCounts();
-      // Opcional: Polling cada 30s
       const interval = setInterval(fetchCounts, 30000);
       return () => clearInterval(interval);
     } else {
@@ -84,7 +77,6 @@ export function NotificationProvider({ children }) {
     }
   }, [user, fetchCounts]);
 
-  // Función para forzar recarga (ej. tras firmar)
   const refreshCounts = () => {
     fetchCounts();
   };

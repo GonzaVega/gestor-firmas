@@ -21,7 +21,6 @@ function NuevaSolicitudForm({ onNueva }) {
   }, []);
 
   const handleExpedienteChange = (e) => {
-    // Solo permitir números, barra y máximo 6+2 dígitos
     let value = e.target.value.replace(/[^\d\/]/g, "");
     setExpedienteNumero(value);
     if (!EXPEDIENTE_REGEX.test(value)) {

@@ -6,7 +6,6 @@ export default function PrivateRoute({ children }) {
   if (!initialized) {
     return null;
   }
-  // En desarrollo, siempre hay usuario de prueba
   if (user) {
     return children;
   }

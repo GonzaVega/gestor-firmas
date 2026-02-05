@@ -8,21 +8,9 @@ function PaginatedList({
   style = {},
   emptyMessage = "No hay items.",
   loading = false,
-  showSearch = false, // If the search is external, this might not be needed inside, but purely for pagination
+  showSearch = false,
 }) {
   const [limit, setLimit] = useState(initialLimit);
-
-  // Reset limit when items change (e.g. searching/filtering) ??
-  // Actually, if I filter, the list might shrink. If I clear filter, it grows.
-  // It's usually better to reset limit when the mode changes or main list changes significantly,
-  // but strictly speaking, if 'items' prop updates (due to search), we can keep 'limit' or reset it.
-  // Let's keep it simple: if items.length < limit, it just shows all.
-  // If I search and find 2 items, limit 10 is fine.
-  // If I clear search, I might want to go back to 10? Or stay at 10.
-  // Let's leave state management simple for now.
-
-  // Optional: Reset limit if items array reference changes drastically?
-  // Probably not needed for simple "View More".
 
   if (loading) {
     return <div>Cargando...</div>;

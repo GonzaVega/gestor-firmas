@@ -42,7 +42,6 @@ function MisSolicitudes() {
     axiosInstance
       .get("/tareas")
       .then((res) => {
-        // En backend real: filter por created_by o similar
         const data = res.data.filter(
           (t) => !t.solicitante_id || t.solicitante_id === user?.id,
         );
@@ -57,7 +56,6 @@ function MisSolicitudes() {
     axiosInstance
       .get("/notas")
       .then((res) => {
-        // En backend real: filter por remitente_id
         const data = res.data.filter(
           (n) => !n.remitente_id || n.remitente_id === user?.id,
         );
@@ -113,10 +111,6 @@ function MisSolicitudes() {
     PendienteComponent = TareaCard;
     RealizadaComponent = TareaCard;
   } else if (mode === "notas") {
-    // Notas enviadas: pendientes (no leidas) y realizadas (leidas)? O simplemente historial?
-    // Asumiremos que "pendiente" es no leida por el destinatario, pero para el remitente quizás solo quiere ver historial.
-    // Mostraremos historial cronológico. Pero la UI tiene 2 columnas.
-    // Pondremos en "Izquierda" (Pendientes) las No Leídas (esperando lectura) y Derecha las Leídas.
     pendientes = notas.filter((n) => n.estado === "no_leida");
     realizadas = notas.filter((n) => n.estado !== "no_leida");
     PendienteComponent = NotaCard;

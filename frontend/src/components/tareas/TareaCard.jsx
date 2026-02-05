@@ -19,8 +19,6 @@ function TareaCard({ tarea, onCompletar, isReceptor }) {
   const isPendiente = estado === "pendiente";
   const vencida = isPendiente && new Date(fecha_limite) < new Date();
 
-  // Mapeo para usar estilos de FirmaCard
-  // Pendiente -> 'pendiente', Completada -> 'firmado', Vencida -> 'rechazado' (para usar colores existentes)
   let estadoVisual = "firmado";
   if (isPendiente) {
     estadoVisual = vencida ? "rechazado" : "pendiente";

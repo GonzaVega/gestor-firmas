@@ -7,14 +7,12 @@ function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  // Mantener la lógica de autenticación igual, solo se elimina el selector visual de rol
   const handleSuccess = async (credentialResponse) => {
     try {
       const res = await axiosInstance.post("/auth/google", {
         id_token: credentialResponse.credential,
       });
       login(res.data.jwt, res.data.user);
-      // Redirigir según el rol recibido
       if (res.data.user.rol === "firmante") {
         navigate("/bandejaentrada");
       } else {

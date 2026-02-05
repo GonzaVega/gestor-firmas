@@ -37,7 +37,6 @@ function NuevaTareaForm({ onNueva }) {
     }
     if (fechaLimite) {
       const limit = new Date(fechaLimite);
-      // Ajustar zona horaria local para comparación de fechas sin hora
       const limitDate = new Date(
         limit.getUTCFullYear(),
         limit.getUTCMonth(),
@@ -46,9 +45,6 @@ function NuevaTareaForm({ onNueva }) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      // Usamos la fecha ingresada tal cual viene del input type="date"
-      // Comparar strings YYYY-MM-DD es más seguro para evitar lios de zona horaria local
-      // Input date devuelve YYYY-MM-DD
       const todayStr = today.toISOString().split("T")[0];
       if (fechaLimite < todayStr) {
         setFormError("La fecha límite no puede ser anterior a hoy");
@@ -66,7 +62,6 @@ function NuevaTareaForm({ onNueva }) {
         estado: "pendiente",
       });
       onNueva && onNueva(res.data);
-      // Reset form
       setAsignadoId("");
       setExpedienteNumero("");
       setFechaLimite("");

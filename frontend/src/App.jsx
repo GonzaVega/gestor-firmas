@@ -3,7 +3,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import "./App.css";
 import "./mobile.css";
-import "./components/common/Badges.css"; // Importar estilos de badges
+import "./components/common/Badges.css";
 import Login from "./pages/Login";
 import BandejaEntrada from "./pages/BandejaEntrada";
 import MisSolicitudes from "./pages/MisSolicitudes";
