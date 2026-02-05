@@ -6,8 +6,8 @@ export default function ModeSelector({
   badges = {},
 }) {
   const modes = [
-    { id: "firmas", label: "Firmas" },
     { id: "tareas", label: "Tareas" },
+    { id: "firmas", label: "Firmas" },
     { id: "notas", label: "Notas" },
   ];
 

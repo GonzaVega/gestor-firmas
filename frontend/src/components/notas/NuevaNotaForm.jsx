@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 
+import InlineError from "../common/InlineError";
+
 function NuevaNotaForm({ onNueva }) {
   const [usuarios, setUsuarios] = useState([]);
   const [destinatarioId, setDestinatarioId] = useState("");
@@ -8,6 +10,7 @@ function NuevaNotaForm({ onNueva }) {
   const [contenido, setContenido] = useState("");
   const [loading, setLoading] = useState(false);
   const [expedienteError, setExpedienteError] = useState("");
+  const [formError, setFormError] = useState("");
 
   const EXPEDIENTE_REGEX = /^\d{1,6}\/\d{2}$/;
 
@@ -32,6 +35,7 @@ function NuevaNotaForm({ onNueva }) {
       return;
     }
     setLoading(true);
+    setFormError("");
     try {
       const res = await axiosInstance.post("/notas", {
         destinatario_id: destinatarioId,
@@ -44,7 +48,7 @@ function NuevaNotaForm({ onNueva }) {
       setExpedienteNumero("");
       setContenido("");
     } catch (err) {
-      alert("Error al enviar nota");
+      setFormError("Error al enviar nota");
     } finally {
       setLoading(false);
     }
@@ -94,6 +98,7 @@ function NuevaNotaForm({ onNueva }) {
       </button>
     </form>
   );
+  <InlineError error={formError} />;
 }
 
 export default NuevaNotaForm;

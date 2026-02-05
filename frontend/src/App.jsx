@@ -2,10 +2,11 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import "./App.css";
+import "./mobile.css";
 import "./components/common/Badges.css"; // Importar estilos de badges
 import Login from "./pages/Login";
-import DashboardFirmante from "./pages/DashboardFirmante";
-import DashboardSolicitante from "./pages/DashboardSolicitante";
+import BandejaEntrada from "./pages/BandejaEntrada";
+import MisSolicitudes from "./pages/MisSolicitudes";
 import NotFound from "./pages/NotFound";
 import Header from "./components/common/Header";
 import PrivateRoute from "./components/common/PrivateRoute";
@@ -32,10 +33,10 @@ function AppContent() {
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route
-            path="/pendientes"
+            path="/bandejaentrada"
             element={
               <PrivateRoute>
-                <DashboardFirmante />
+                <BandejaEntrada />
               </PrivateRoute>
             }
           />
@@ -43,7 +44,7 @@ function AppContent() {
             path="/solicitudes"
             element={
               <PrivateRoute>
-                <DashboardSolicitante />
+                <MisSolicitudes />
               </PrivateRoute>
             }
           />

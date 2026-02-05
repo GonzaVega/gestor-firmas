@@ -8,9 +8,10 @@ import { useAuth } from "../context/useAuth";
 import { useNotifications } from "../context/NotificationContext";
 import ExpedienteSearch from "../components/common/ExpedienteSearch";
 import { filterByExpediente } from "../utils/filterExpedientes";
+import PaginatedList from "../components/common/PaginatedList";
 
-function DashboardFirmante() {
-  const [mode, setMode] = useState("firmas");
+function BandejaEntrada() {
+  const [mode, setMode] = useState("tareas");
   const [solicitudes, setSolicitudes] = useState([]);
   const [tareas, setTareas] = useState([]);
   const [notas, setNotas] = useState([]);
@@ -236,27 +237,26 @@ function DashboardFirmante() {
           hidden={pendientesBase.length === 0}
         />
 
-        {pendientes.length === 0 ? (
-          <div className="empty-list">No hay pendientes.</div>
-        ) : (
-          <div className="solicitudes-list pendientes">
-            {pendientes.map((item) => (
-              <div key={item.id}>
-                {mode === "firmas" ? (
-                  <FirmaCard
-                    solicitud={item}
-                    onFirmar={handleFirmar}
-                    onRechazar={handleRechazar}
-                  />
-                ) : mode === "tareas" ? (
-                  <TareaCard {...getCardProps(item)} />
-                ) : (
-                  <NotaCard {...getCardProps(item)} />
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+        <PaginatedList
+          items={pendientes}
+          emptyMessage="No hay pendientes."
+          className="solicitudes-list pendientes"
+          renderItem={(item) => (
+            <div key={item.id}>
+              {mode === "firmas" ? (
+                <FirmaCard
+                  solicitud={item}
+                  onFirmar={handleFirmar}
+                  onRechazar={handleRechazar}
+                />
+              ) : mode === "tareas" ? (
+                <TareaCard {...getCardProps(item)} />
+              ) : (
+                <NotaCard {...getCardProps(item)} />
+              )}
+            </div>
+          )}
+        />
 
         <h2>{getSectionTitle(false)}</h2>
         <ExpedienteSearch
@@ -266,26 +266,25 @@ function DashboardFirmante() {
           hidden={noPendientesBase.length === 0}
         />
 
-        {noPendientes.length === 0 ? (
-          <div className="empty-list">No hay historial.</div>
-        ) : (
-          <div className="solicitudes-list procesadas">
-            {noPendientes.map((item) => (
-              <div key={item.id}>
-                {mode === "firmas" ? (
-                  <FirmaCard solicitud={item} />
-                ) : mode === "tareas" ? (
-                  <TareaCard {...getCardProps(item)} />
-                ) : (
-                  <NotaCard {...getCardProps(item)} />
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+        <PaginatedList
+          items={noPendientes}
+          emptyMessage="No hay historial."
+          className="solicitudes-list procesadas"
+          renderItem={(item) => (
+            <div key={item.id}>
+              {mode === "firmas" ? (
+                <FirmaCard solicitud={item} />
+              ) : mode === "tareas" ? (
+                <TareaCard {...getCardProps(item)} />
+              ) : (
+                <NotaCard {...getCardProps(item)} />
+              )}
+            </div>
+          )}
+        />
       </div>
     </div>
   );
 }
 
-export default DashboardFirmante;
+export default BandejaEntrada;

@@ -44,6 +44,14 @@ function NotaCard({ nota, onMarcarLeida, isReceptor }) {
           estadoVisual,
         )}
         onClick={() => setShowModal(true)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setShowModal(true);
+          }
+        }}
         style={{
           cursor: "pointer",
           display: "flex !important",
@@ -54,22 +62,8 @@ function NotaCard({ nota, onMarcarLeida, isReceptor }) {
           boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
         }}
       >
-        <div
-          className="firma-card-main"
-          role="button"
-          tabIndex={0}
-          style={{ outline: "none" }}
-        >
-          <div
-            className="firma-card-row"
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: "24px",
-              width: "100%",
-              justifyContent: "space-between",
-            }}
-          >
+        <div className="firma-card-main" style={{ outline: "none" }}>
+          <div className="firma-card-row">
             {/* Columna 1: Expediente */}
             <div className="firma-card-col expediente">
               <b>Expediente:</b> <b>{expediente}</b>
@@ -144,11 +138,13 @@ function NotaCard({ nota, onMarcarLeida, isReceptor }) {
                 color: "#fff",
                 border: "none",
                 borderRadius: "6px",
-                padding: "7px 0",
+                padding: "7px 16px",
                 fontWeight: "600",
                 fontSize: "1rem",
                 cursor: "pointer",
-                width: "140px",
+                width: "auto",
+                minWidth: "140px",
+                whiteSpace: "nowrap",
                 textAlign: "center",
               }}
             >

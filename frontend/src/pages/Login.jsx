@@ -16,7 +16,7 @@ function Login() {
       login(res.data.jwt, res.data.user);
       // Redirigir según el rol recibido
       if (res.data.user.rol === "firmante") {
-        navigate("/pendientes");
+        navigate("/bandejaentrada");
       } else {
         navigate("/solicitudes");
       }

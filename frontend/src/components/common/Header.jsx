@@ -16,7 +16,7 @@ function Header() {
 
   return (
     <nav className="navbar-app">
-      <div className="navbar-title">Gestor de Firmas</div>
+      <div className="navbar-title">Gestiona</div>
       <div className="navbar-actions">
         <button
           className={`btn-navbar ${isActive("/solicitudes")}`}
@@ -25,8 +25,8 @@ function Header() {
           Mis Solicitudes
         </button>
         <button
-          className={`btn-navbar ${isActive("/pendientes")}`}
-          onClick={() => navigate("/pendientes")}
+          className={`btn-navbar ${isActive("/bandejaentrada")}`}
+          onClick={() => navigate("/bandejaentrada")}
           style={{ position: "relative" }}
         >
           Bandeja de Entrada

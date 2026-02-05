@@ -31,7 +31,7 @@
 }
 
 .mode-button.active {
-  background-color: #535bf2; /* Azul acento de la app (index.css) */
+  background-color: #0ea5e9; /* Celeste para distinguir del azul corporativo */
   color: #ffffff;
   font-weight: 600;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);

@@ -1,7 +1,7 @@
 .navbar-badge {
   position: absolute;
-  top: -5px;
-  right: -5px;
+  top: -10px;
+  right: -10px;
   background-color: #ef4444; /* Rojo vibrante */
   color: white;
   border-radius: 999px;
@@ -18,8 +18,8 @@
 /* Ajuste para el ModeSelector badge (position absolute outside) */
 .mode-badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
+  top: -9px;
+  right: -9px;
   display: flex;
   align-items: center;
   justify-content: center;

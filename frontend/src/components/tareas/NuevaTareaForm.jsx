@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 
+import InlineError from "../common/InlineError";
+
 function NuevaTareaForm({ onNueva }) {
   const [usuarios, setUsuarios] = useState([]);
   const [asignadoId, setAsignadoId] = useState("");
@@ -9,6 +11,7 @@ function NuevaTareaForm({ onNueva }) {
   const [descripcion, setDescripcion] = useState("");
   const [loading, setLoading] = useState(false);
   const [expedienteError, setExpedienteError] = useState("");
+  const [formError, setFormError] = useState("");
 
   const EXPEDIENTE_REGEX = /^\d{1,6}\/\d{2}$/;
 
@@ -32,7 +35,28 @@ function NuevaTareaForm({ onNueva }) {
       setExpedienteError("Formato: ######/##");
       return;
     }
+    if (fechaLimite) {
+      const limit = new Date(fechaLimite);
+      // Ajustar zona horaria local para comparación de fechas sin hora
+      const limitDate = new Date(
+        limit.getUTCFullYear(),
+        limit.getUTCMonth(),
+        limit.getUTCDate(),
+      );
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Usamos la fecha ingresada tal cual viene del input type="date"
+      // Comparar strings YYYY-MM-DD es más seguro para evitar lios de zona horaria local
+      // Input date devuelve YYYY-MM-DD
+      const todayStr = today.toISOString().split("T")[0];
+      if (fechaLimite < todayStr) {
+        setFormError("La fecha límite no puede ser anterior a hoy");
+        return;
+      }
+    }
     setLoading(true);
+    setFormError("");
     try {
       const res = await axiosInstance.post("/tareas", {
         asignado_a: asignadoId,
@@ -48,7 +72,7 @@ function NuevaTareaForm({ onNueva }) {
       setFechaLimite("");
       setDescripcion("");
     } catch (err) {
-      alert("Error al crear tarea");
+      setFormError("Error al crear tarea");
     } finally {
       setLoading(false);
     }
@@ -121,6 +145,7 @@ function NuevaTareaForm({ onNueva }) {
       <button type="submit" disabled={loading} className="btn-primary">
         {loading ? "Creando..." : "Crear Tarea"}
       </button>
+      <InlineError error={formError} />
     </form>
   );
 }

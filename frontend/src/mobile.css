@@ -1,0 +1,44 @@
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .firma-card-horizontal .firma-card-row {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  /* Make columns full width */
+  .firma-card-horizontal .firma-card-col,
+  .firma-card-horizontal .firma-card-col.expediente,
+  .firma-card-horizontal .firma-card-col.firmante,
+  .firma-card-horizontal .firma-card-col.solicitante,
+  .firma-card-horizontal .firma-card-col.documentos {
+    flex: 1 1 100%;
+    width: 100%;
+    overflow: visible;
+    white-space: normal;
+  }
+
+  /* Adjust state badge alignment */
+  .firma-card-horizontal .firma-card-col.estado {
+    text-align: left;
+    margin-top: 8px;
+    display: flex;
+    width: 100%;
+  }
+
+  /* Adjust action buttons container */
+  .firma-card .acciones {
+    flex-direction: column;
+    width: 100%;
+    padding: 0 1rem;
+    box-sizing: border-box;
+  }
+
+  .firma-card .acciones button {
+    width: 100% !important;
+  }
+
+  /* Adjust padding on mobile cards */
+  .firma-card {
+    padding: 1rem !important;
+  }
+}

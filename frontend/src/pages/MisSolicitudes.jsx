@@ -10,18 +10,19 @@ import ModeSelector from "../components/common/ModeSelector";
 import { useAuth } from "../context/useAuth";
 import ExpedienteSearch from "../components/common/ExpedienteSearch";
 import { filterByExpediente } from "../utils/filterExpedientes";
+import PaginatedList from "../components/common/PaginatedList";
 
-function DashboardSolicitante() {
-  const [mode, setMode] = useState("firmas");
+function MisSolicitudes() {
+  const [mode, setMode] = useState("tareas");
   const [solicitudes, setSolicitudes] = useState([]);
   const [tareas, setTareas] = useState([]);
   const [notas, setNotas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
-  
+
   const [busquedaPendientes, setBusquedaPendientes] = useState("");
   const [busquedaRealizadas, setBusquedaRealizadas] = useState("");
-  
+
   const { user } = useAuth();
 
   const fetchFirmas = useCallback(() => {
@@ -42,7 +43,9 @@ function DashboardSolicitante() {
       .get("/tareas")
       .then((res) => {
         // En backend real: filter por created_by o similar
-        const data = res.data.filter(t => !t.solicitante_id || t.solicitante_id === user?.id); 
+        const data = res.data.filter(
+          (t) => !t.solicitante_id || t.solicitante_id === user?.id,
+        );
         setTareas(data);
       })
       .catch(() => {})
@@ -55,13 +58,14 @@ function DashboardSolicitante() {
       .get("/notas")
       .then((res) => {
         // En backend real: filter por remitente_id
-        const data = res.data.filter(n => !n.remitente_id || n.remitente_id === user?.id); 
+        const data = res.data.filter(
+          (n) => !n.remitente_id || n.remitente_id === user?.id,
+        );
         setNotas(data);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [user]);
-
 
   useEffect(() => {
     setBusquedaPendientes("");
@@ -78,14 +82,14 @@ function DashboardSolicitante() {
 
   const handleNueva = (nueva) => {
     if (mode === "firmas") {
-        setSolicitudes((prev) => [nueva, ...prev]);
-        showToast("success", "Solicitud creada correctamente");
+      setSolicitudes((prev) => [nueva, ...prev]);
+      showToast("success", "Solicitud creada correctamente");
     } else if (mode === "tareas") {
-        setTareas((prev) => [nueva, ...prev]);
-        showToast("success", "Tarea asignada correctamente");
+      setTareas((prev) => [nueva, ...prev]);
+      showToast("success", "Tarea asignada correctamente");
     } else if (mode === "notas") {
-        setNotas((prev) => [nueva, ...prev]);
-        showToast("success", "Nota enviada correctamente");
+      setNotas((prev) => [nueva, ...prev]);
+      showToast("success", "Nota enviada correctamente");
     }
   };
 
@@ -95,46 +99,61 @@ function DashboardSolicitante() {
   let RealizadaComponent = null;
 
   if (mode === "firmas") {
-    pendientes = solicitudes.filter(s => (s.estado_firma || s.estado) === "pendiente");
-    realizadas = solicitudes.filter(s => (s.estado_firma || s.estado) !== "pendiente");
+    pendientes = solicitudes.filter(
+      (s) => (s.estado_firma || s.estado) === "pendiente",
+    );
+    realizadas = solicitudes.filter(
+      (s) => (s.estado_firma || s.estado) !== "pendiente",
+    );
     PendienteComponent = FirmaCard;
     RealizadaComponent = FirmaCard;
   } else if (mode === "tareas") {
-    pendientes = tareas.filter(t => t.estado === "pendiente");
-    realizadas = tareas.filter(t => t.estado !== "pendiente");
+    pendientes = tareas.filter((t) => t.estado === "pendiente");
+    realizadas = tareas.filter((t) => t.estado !== "pendiente");
     PendienteComponent = TareaCard;
     RealizadaComponent = TareaCard;
   } else if (mode === "notas") {
     // Notas enviadas: pendientes (no leidas) y realizadas (leidas)? O simplemente historial?
     // Asumiremos que "pendiente" es no leida por el destinatario, pero para el remitente quizás solo quiere ver historial.
-    // Mostraremos historial cronológico. Pero la UI tiene 2 columnas. 
+    // Mostraremos historial cronológico. Pero la UI tiene 2 columnas.
     // Pondremos en "Izquierda" (Pendientes) las No Leídas (esperando lectura) y Derecha las Leídas.
-    pendientes = notas.filter(n => n.estado === "no_leida");
-    realizadas = notas.filter(n => n.estado !== "no_leida");
+    pendientes = notas.filter((n) => n.estado === "no_leida");
+    realizadas = notas.filter((n) => n.estado !== "no_leida");
     PendienteComponent = NotaCard;
     RealizadaComponent = NotaCard;
   }
 
-  const pendientesFiltradas = filterByExpediente(pendientes, busquedaPendientes);
-  const realizadasFiltradas = filterByExpediente(realizadas, busquedaRealizadas);
+  const pendientesFiltradas = filterByExpediente(
+    pendientes,
+    busquedaPendientes,
+  );
+  const realizadasFiltradas = filterByExpediente(
+    realizadas,
+    busquedaRealizadas,
+  );
 
   const getCardProps = (item) => {
-      if (mode === "firmas") return { solicitud: item };
-      if (mode === "tareas") return { tarea: item, isReceptor: false };
-      if (mode === "notas") return { nota: item, isReceptor: false };
-      return {};
+    if (mode === "firmas") return { solicitud: item };
+    if (mode === "tareas") return { tarea: item, isReceptor: false };
+    if (mode === "notas") return { nota: item, isReceptor: false };
+    return {};
   };
 
   const getSectionTitle = (isPendiente) => {
-      if (mode === "firmas") return isPendiente ? "Solicitudes pendientes" : "Solicitudes realizadas";
-      if (mode === "tareas") return isPendiente ? "Tareas asignadas (En curso)" : "Tareas completadas";
-      if (mode === "notas") return isPendiente ? "Notas enviadas (No leídas)" : "Notas leídas/Archivadas";
+    if (mode === "firmas")
+      return isPendiente ? "Solicitudes pendientes" : "Solicitudes realizadas";
+    if (mode === "tareas")
+      return isPendiente ? "Tareas asignadas (En curso)" : "Tareas completadas";
+    if (mode === "notas")
+      return isPendiente
+        ? "Notas enviadas (No leídas)"
+        : "Notas leídas/Archivadas";
   };
 
   return (
     <div className="dashboard-solicitante">
       {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
-      
+
       <ModeSelector currentMode={mode} onModeChange={setMode} />
 
       <div className="solicitante-form-section fade-in" key={`${mode}-form`}>
@@ -151,19 +170,20 @@ function DashboardSolicitante() {
           placeholder="Buscar por expediente..."
           hidden={pendientes.length === 0}
         />
-        
-        {loading && <div>Cargando...</div>}
-        
-        {!loading && pendientesFiltradas.length === 0 && (
-           <div className="empty-list">No hay items.</div>
-        )}
 
-        <div className="solicitudes-list pendientes" style={{ borderRadius: "8px", padding: "1rem 0" }}>
-            {pendientesFiltradas.map((item) => {
-                const Cmp = PendienteComponent;
-                return Cmp ? <Cmp key={item.id} {...getCardProps(item)} /> : null;
-            })}
-        </div>
+        {loading && <div>Cargando...</div>}
+
+        <PaginatedList
+          items={pendientesFiltradas}
+          loading={loading}
+          emptyMessage="No hay items."
+          className="solicitudes-list pendientes"
+          style={{ borderRadius: "8px", padding: "1rem 0" }}
+          renderItem={(item) => {
+            const Cmp = PendienteComponent;
+            return Cmp ? <Cmp key={item.id} {...getCardProps(item)} /> : null;
+          }}
+        />
 
         <h2>{getSectionTitle(false)}</h2>
         <ExpedienteSearch
@@ -172,20 +192,21 @@ function DashboardSolicitante() {
           placeholder="Buscar por expediente..."
           hidden={realizadas.length === 0}
         />
-        
-        {!loading && realizadasFiltradas.length === 0 && (
-           <div className="empty-list">No hay historial.</div>
-        )}
 
-        <div className="solicitudes-list realizadas" style={{ borderRadius: "8px", padding: "1rem 0" }}>
-            {realizadasFiltradas.map((item) => {
-                const Cmp = RealizadaComponent;
-                return Cmp ? <Cmp key={item.id} {...getCardProps(item)} /> : null;
-            })}
-        </div>
+        <PaginatedList
+          items={realizadasFiltradas}
+          loading={loading}
+          emptyMessage="No hay historial."
+          className="solicitudes-list realizadas"
+          style={{ borderRadius: "8px", padding: "1rem 0" }}
+          renderItem={(item) => {
+            const Cmp = RealizadaComponent;
+            return Cmp ? <Cmp key={item.id} {...getCardProps(item)} /> : null;
+          }}
+        />
       </div>
     </div>
   );
 }
 
-export default DashboardSolicitante;
+export default MisSolicitudes;
