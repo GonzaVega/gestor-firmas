@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import axiosInstance from "../api/axiosInstance";
+import axiosInstance from "../../api/axiosInstance";
+
+import InlineError from "../common/InlineError";
 
 function NuevaSolicitudForm({ onNueva }) {
   const [usuarios, setUsuarios] = useState([]);
@@ -10,6 +12,7 @@ function NuevaSolicitudForm({ onNueva }) {
   const [comentario, setComentario] = useState("");
   const [loading, setLoading] = useState(false);
   const [expedienteError, setExpedienteError] = useState("");
+  const [formError, setFormError] = useState("");
 
   const EXPEDIENTE_REGEX = /^\d{1,6}\/\d{2}$/;
 
@@ -18,7 +21,6 @@ function NuevaSolicitudForm({ onNueva }) {
   }, []);
 
   const handleExpedienteChange = (e) => {
-    // Solo permitir números, barra y máximo 6+2 dígitos
     let value = e.target.value.replace(/[^\d\/]/g, "");
     setExpedienteNumero(value);
     if (!EXPEDIENTE_REGEX.test(value)) {
@@ -54,7 +56,7 @@ function NuevaSolicitudForm({ onNueva }) {
       setTodosLosDocumentos(false);
       setComentario("");
     } catch (err) {
-      alert("Error al crear solicitud");
+      setFormError("Error al crear solicitud");
     } finally {
       setLoading(false);
     }
@@ -117,6 +119,7 @@ function NuevaSolicitudForm({ onNueva }) {
       <button type="submit" disabled={loading}>
         Crear Solicitud
       </button>
+      <InlineError error={formError} />
     </form>
   );
 }

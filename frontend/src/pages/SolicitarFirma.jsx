@@ -19,9 +19,8 @@ export default function SolicitarFirma() {
     setTimeout(() => setToast(null), 2000);
   };
 
-  // Ordenar de más reciente a más antiguo
   const ordenadas = [...solicitudes].sort(
-    (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    (a, b) => new Date(b.created_at) - new Date(a.created_at),
   );
 
   return (

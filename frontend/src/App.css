@@ -257,6 +257,7 @@
   justify-content: center;
   gap: 16px;
   margin-top: 12px;
+  width: 100%;
 }
 .firma-card .acciones button {
   font-weight: 600;
@@ -297,8 +298,7 @@
 .navbar-actions {
   display: flex;
   gap: 12px;
-  margin-left: auto;
-  padding-right: 24px;
+  /* Centered via absolute positioning in later rule or here */
 }
 
 .btn-navbar {
@@ -310,9 +310,15 @@
   font-size: 1rem;
   cursor: pointer;
   transition: background 0.2s;
+  position: relative;
 }
 .btn-navbar:hover {
   background: #4e5666;
+}
+.btn-navbar.active {
+  background: #0ea5e9;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 /* Login styles */
 .login-bg {
@@ -466,10 +472,10 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   position: fixed;
   top: 5px;
-  left: 0;
-  right: 0;
-  margin: 0 auto;
-  max-width: 1200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 4rem);
+  max-width: calc(1600px - 4rem);
   box-sizing: border-box;
   border-radius: 16px;
   z-index: 10;
@@ -547,9 +553,10 @@ body {
 
 /* Actualizar el orden de los elementos en el navbar */
 .navbar-actions {
-  margin-right: 0;
-  margin-left: auto;
-  order: 2;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
 }
 
 .navbar-user {
@@ -564,7 +571,7 @@ body {
 }
 
 .main-content {
-  max-width: 1200px;
+  max-width: 1600px;
   width: 100%;
   margin: 0 auto;
   padding: 5.5rem 2rem 2rem 2rem;
@@ -610,6 +617,21 @@ body {
   padding: 1rem 1.5rem;
   box-shadow: 0 1px 4px #0003;
   transition: background 0.2s;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.75rem;
+}
+
+.firma-card-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.firma-card-main:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 4px;
 }
 
 .solicitante-form-section {
@@ -639,7 +661,7 @@ body {
 
 .solicitudes-list.pendientes {
   border-radius: 8px;
-  padding: 1rem;
+  /* padding: 1rem; Removido para igualar ancho con procesadas */
 }
 .solicitudes-list.realizadas {
   border-radius: 8px;
@@ -976,6 +998,24 @@ body {
   color: #888;
 }
 
+/* Adaptación para pantallas medianas (Laptop pequeñas/Tablets landscape) */
+@media (max-width: 1460px) {
+  .navbar-app {
+    justify-content: flex-start;
+  }
+  .navbar-title {
+    margin-right: 20px;
+  }
+  .navbar-actions {
+    position: static;
+    transform: none;
+    margin: 0;
+  }
+  .navbar-user {
+    margin-left: auto;
+  }
+}
+
 /* Ajustes para mobile sin tocar desktop */
 @media (max-width: 768px) {
   body {
@@ -984,98 +1024,116 @@ body {
   }
 
   .navbar-app {
-    position: sticky;
+    position: relative; /* No sticky en mobile para ahorrar espacio */
     top: 0;
     left: 0;
-    right: 0;
-    margin: 0;
-    max-width: none;
-    border-radius: 0;
-    padding: 0.75rem 1rem;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
-    z-index: 20;
-  }
-
-  /* Cerrar sesión alineado con el título en mobile */
-  .navbar-app {
-    padding-top: 1.5rem;
-  }
-  .navbar-title {
-    font-size: 1.2rem;
-    padding-right: 140px; /* espacio para el botón */
-  }
-  .navbar-user .btn-navbar:last-child {
-    position: absolute;
-    top: 0.8rem;
-    right: 1rem;
-    width: auto;
-    padding: 0.55rem 1rem;
-  }
-  .navbar-user {
-    padding-top: 0.5rem;
-  }
-
-  .navbar-title {
-    font-size: 1.2rem;
-  }
-
-  .navbar-actions {
     width: 100%;
-    padding-right: 0;
+    margin: 0;
+    border-radius: 0;
+    padding: 1rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    height: auto;
+    transform: none;
+  }
+
+  .navbar-title {
+    font-size: 1.25rem;
+    margin: 0;
+    padding: 0;
+    text-align: left;
+  }
+
+  /* Botones de acción tipo Pestañas */
+  .navbar-actions {
+    position: static;
+    transform: none;
+    margin: 0;
+    width: 100%;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 0.5rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
     order: 2;
-    margin-left: 0;
   }
 
   .navbar-actions .btn-navbar {
     width: 100%;
+    justify-content: center;
+    text-align: center;
+    padding: 0.75rem;
+    font-size: 0.95rem;
   }
 
+  /* Sección de usuario redistribuida */
   .navbar-user {
+    position: static;
+    margin: 0;
+    padding: 0;
     order: 3;
     width: 100%;
-    margin-left: 0;
-    padding: 0;
+    display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.75rem;
+    border-radius: 8px;
   }
 
-  .navbar-user .btn-navbar {
+  .user-name {
+    font-size: 0.9rem;
+    color: #9ca3af;
     width: 100%;
-  }
-
-  .custom-select {
-    width: 100%;
-    margin-left: 0;
+    order: 1;
   }
 
   .role-selector {
-    width: 100%;
-    justify-content: space-between;
+    width: auto;
+    flex: 1;
+    order: 2;
   }
 
   .role-options {
+    /* Asegurar que el desplegable no se salga */
     width: 100%;
+    left: 0;
   }
 
+  /* Botón cerrar sesión más compacto */
+  .navbar-user .btn-navbar:last-child {
+    position: static; /* En el flujo */
+    order: 3;
+    width: auto;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    background: #dc2626; /* Rojo para distinguir */
+    color: white;
+  }
+
+  /* Ajustar content padding ya que navbar no es fixed */
   .main-content {
-    padding: 5rem 0.75rem 1.5rem;
+    padding: 1rem 0.75rem; /* Padding normal superior */
     max-width: none;
   }
 
+  /* Cards full width */
   .dashboard-solicitante,
   .dashboard-firmante {
-    padding: 0.75rem 0.5rem;
-    margin-top: 1rem;
-    border-radius: 12px;
+    padding: 0;
+    margin-top: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
   }
 
+  /* Ajuste de forms en mobile */
   .solicitante-form-section,
-  .solicitante-list-section,
+  .solicitante-list-section {
+    padding: 1rem;
+  }
+
   .firmante-list-section {
     padding: 0 !important;
     width: 100%;
@@ -1150,8 +1208,11 @@ body {
 
   .firma-card .acciones {
     width: 100%;
-    justify-content: flex-start;
+    justify-content: center;
     flex-wrap: wrap;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .firmante-item {
@@ -1175,8 +1236,6 @@ body {
   .firmante-item .comentario {
     max-width: 100%;
   }
-
-
 
   .toggle-row {
     padding: 0;

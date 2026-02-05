@@ -19,7 +19,6 @@ function DashboardSolicitante() {
     axiosInstance
       .get("/firma_solicitudes")
       .then((res) => {
-        // Solo mostrar las que creó el usuario actual
         const data = res.data.filter((s) => s.solicitante_id === user?.id);
         setSolicitudes(data);
         setLoading(false);
