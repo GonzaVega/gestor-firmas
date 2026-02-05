@@ -96,9 +96,9 @@ function NuevaNotaForm({ onNueva }) {
       <button type="submit" disabled={loading} className="btn-primary">
         {loading ? "Enviando..." : "Enviar Nota"}
       </button>
+      <InlineError error={formError} />
     </form>
   );
-  <InlineError error={formError} />;
 }
 
 export default NuevaNotaForm;

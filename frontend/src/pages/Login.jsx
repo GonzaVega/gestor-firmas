@@ -28,7 +28,7 @@ function Login() {
   return (
     <div className="login-bg">
       <div className="login-card login-card-custom">
-        <h1 className="app-title-login">Gestor de Firmas</h1>
+        <h1 className="app-title-login">Gestiona</h1>
         <h2 className="login-title">Iniciar sesión</h2>
         <div className="login-google-wrapper">
           <GoogleLogin
