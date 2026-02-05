@@ -1,0 +1,38 @@
+.mode-selector-container {
+  display: flex;
+  justify-content: center;
+  gap: 0.25rem;
+  margin: 0 auto 2.5rem auto; /* Centrado y separado */
+  background-color: #333a45; /* Gris oscuro azulado para coincidir con tema oscuro */
+  padding: 0.3rem;
+  border-radius: 999px;
+  width: fit-content;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+  border: 1px solid #454d5a;
+}
+
+.mode-button {
+  background: transparent;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #94a3b8; /* Gris claro apagado */
+  border-radius: 999px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.3px;
+  position: relative;
+}
+
+.mode-button:hover {
+  color: #e2e8f0;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.mode-button.active {
+  background-color: #535bf2; /* Azul acento de la app (index.css) */
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+}

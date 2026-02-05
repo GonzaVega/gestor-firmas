@@ -1,37 +1,83 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axiosInstance from "../api/axiosInstance";
-import FirmaCard from "../components/FirmaCard";
+import FirmaCard from "../components/firmas/FirmaCard";
+import TareaCard from "../components/tareas/TareaCard";
+import NotaCard from "../components/notas/NotaCard";
+import ModeSelector from "../components/common/ModeSelector";
 import { useAuth } from "../context/useAuth";
-import ExpedienteSearch from "../components/ExpedienteSearch";
+import { useNotifications } from "../context/NotificationContext";
+import ExpedienteSearch from "../components/common/ExpedienteSearch";
 import { filterByExpediente } from "../utils/filterExpedientes";
 
 function DashboardFirmante() {
+  const [mode, setMode] = useState("firmas");
   const [solicitudes, setSolicitudes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [tareas, setTareas] = useState([]);
+  const [notas, setNotas] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
+
   const [busquedaPendientes, setBusquedaPendientes] = useState("");
   const [busquedaProcesadas, setBusquedaProcesadas] = useState("");
+
   const { user } = useAuth();
+  const { refreshCounts, counts } = useNotifications(); // Consumir counts directamente para el ModeSelector
 
   const showToast = (type, msg) => {
     setToast({ type, msg });
     setTimeout(() => setToast(null), 2000);
   };
 
-  useEffect(() => {
+  const fetchFirmas = useCallback(() => {
+    setLoading(true);
     axiosInstance
       .get("/firma_solicitudes")
       .then((res) => {
-        // Solo mostrar las que debe firmar el usuario actual
         const data = res.data.filter((s) => s.firmante_id === user?.id);
         setSolicitudes(data);
-        setLoading(false);
       })
-      .catch(() => {
-        setLoading(false);
-      });
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [user]);
 
+  const fetchTareas = useCallback(() => {
+    setLoading(true);
+    axiosInstance
+      .get("/tareas")
+      .then((res) => {
+        const data = res.data.filter(
+          (t) => String(t.asignado_a) === String(user?.id),
+        );
+        setTareas(data);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [user]);
+
+  const fetchNotas = useCallback(() => {
+    setLoading(true);
+    axiosInstance
+      .get("/notas")
+      .then((res) => {
+        // Notas donde soy destinatario
+        const data = res.data.filter(
+          (n) => String(n.destinatario_id) === String(user?.id),
+        );
+        setNotas(data);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [user]);
+
+  useEffect(() => {
+    setBusquedaPendientes("");
+    setBusquedaProcesadas("");
+    if (mode === "firmas") fetchFirmas();
+    if (mode === "tareas") fetchTareas();
+    if (mode === "notas") fetchNotas();
+  }, [mode, fetchFirmas, fetchTareas, fetchNotas]);
+
+  // Actions Firmas
   const handleFirmar = async (id) => {
     try {
       await axiosInstance.patch(`/firma_solicitudes/${id}`, {
@@ -39,18 +85,20 @@ function DashboardFirmante() {
         estado: "firmado",
         firma_solicitud: { estado_firma: "firmado" },
       });
-      setSolicitudes((solicitudes) =>
-        solicitudes.map((s) =>
+      setSolicitudes((prev) =>
+        prev.map((s) =>
           s.id === id
             ? { ...s, estado: "firmado", estado_firma: "firmado" }
             : s,
         ),
       );
       showToast("success", "Solicitud firmada correctamente");
+      refreshCounts(); // Actualizar contador global
     } catch (error) {
       showToast("error", "No se pudo firmar la solicitud");
     }
   };
+
   const handleRechazar = async (id) => {
     try {
       await axiosInstance.patch(`/firma_solicitudes/${id}`, {
@@ -58,79 +106,180 @@ function DashboardFirmante() {
         estado: "rechazado",
         firma_solicitud: { estado_firma: "rechazado" },
       });
-      setSolicitudes((solicitudes) =>
-        solicitudes.map((s) =>
+      setSolicitudes((prev) =>
+        prev.map((s) =>
           s.id === id
             ? { ...s, estado: "rechazado", estado_firma: "rechazado" }
             : s,
         ),
       );
       showToast("error", "Solicitud rechazada correctamente");
+      refreshCounts(); // Actualizar contador global
     } catch (error) {
       showToast("error", "No se pudo rechazar la solicitud");
     }
   };
 
-  if (loading) return <div>Cargando...</div>;
+  // Actions Tareas
+  const handleCompletarTarea = async (id) => {
+    try {
+      await axiosInstance.patch(`/tareas/${id}`, { estado: "completada" });
+      setTareas((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, estado: "completada" } : t)),
+      );
+      showToast("success", "Tarea marcada como completada");
+      refreshCounts(); // Actualizar contador global
+    } catch (error) {
+      showToast("error", "Error al actualizar tarea");
+    }
+  };
 
-  // Ordenar: pendientes primero (más recientes arriba), luego el resto
-  const pendientesBase = solicitudes
-    .filter((s) => (s.estado_firma || s.estado) === "pendiente")
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  const noPendientesBase = solicitudes
-    .filter((s) => (s.estado_firma || s.estado) !== "pendiente")
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  // Actions Notas
+  const handleLeerNota = async (id) => {
+    try {
+      await axiosInstance.patch(`/notas/${id}`, { estado: "leida" });
+      setNotas((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, estado: "leida" } : n)),
+      );
+      showToast("success", "Nota marcada como leída");
+      refreshCounts(); // Actualizar contador global
+    } catch (error) {
+      showToast("error", "Error al actualizar nota");
+    }
+  };
+
+  if (
+    loading &&
+    solicitudes.length === 0 &&
+    tareas.length === 0 &&
+    notas.length === 0
+  )
+    return <div>Cargando...</div>;
+
+  let pendientesBase = [];
+  let noPendientesBase = [];
+  let PendienteComponent = null;
+  // let HistorialComponent = null;
+
+  if (mode === "firmas") {
+    pendientesBase = solicitudes
+      .filter((s) => (s.estado_firma || s.estado) === "pendiente")
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    noPendientesBase = solicitudes
+      .filter((s) => (s.estado_firma || s.estado) !== "pendiente")
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    PendienteComponent = FirmaCard;
+    // HistorialComponent = FirmaCard;
+  } else if (mode === "tareas") {
+    pendientesBase = tareas
+      .filter((t) => t.estado === "pendiente")
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    noPendientesBase = tareas
+      .filter((t) => t.estado !== "pendiente")
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    PendienteComponent = TareaCard;
+    // HistorialComponent = TareaCard;
+  } else if (mode === "notas") {
+    // Pendientes = No Leidas
+    pendientesBase = notas
+      .filter((n) => n.estado === "no_leida")
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    noPendientesBase = notas
+      .filter((n) => n.estado !== "no_leida")
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    PendienteComponent = NotaCard;
+    // HistorialComponent = NotaCard;
+  }
 
   const pendientes = filterByExpediente(pendientesBase, busquedaPendientes);
   const noPendientes = filterByExpediente(noPendientesBase, busquedaProcesadas);
-  const hayPendientes = pendientes.length > 0;
-  const hayPendientesBase = pendientesBase.length > 0;
-  const hayNoPendientesBase = noPendientesBase.length > 0;
+
+  const getCardProps = (item) => {
+    if (mode === "firmas")
+      return {
+        solicitud: item,
+        onFirmar: handleFirmar,
+        onRechazar: handleRechazar,
+      };
+    if (mode === "tareas")
+      return {
+        tarea: item,
+        isReceptor: true,
+        onCompletar: handleCompletarTarea,
+      };
+    if (mode === "notas")
+      return { nota: item, isReceptor: true, onMarcarLeida: handleLeerNota };
+    return {};
+  };
+
+  const getSectionTitle = (isPendiente) => {
+    if (mode === "firmas")
+      return isPendiente ? "Solicitudes pendientes" : "Historial";
+    if (mode === "tareas")
+      return isPendiente ? "Tareas pendientes" : "Tareas completadas";
+    if (mode === "notas")
+      return isPendiente ? "Notas nuevas" : "Notas archivadas";
+  };
 
   return (
     <div className="dashboard-firmante">
       {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
-      <div className="firmante-list-section">
-        <h2>Solicitudes pendientes</h2>
+
+      <ModeSelector currentMode={mode} onModeChange={setMode} badges={counts} />
+
+      <div className="firmante-list-section fade-in" key={mode}>
+        <h2>{getSectionTitle(true)}</h2>
         <ExpedienteSearch
           value={busquedaPendientes}
           onChange={setBusquedaPendientes}
           placeholder="Buscar por expediente..."
-          hidden={!hayPendientesBase}
+          hidden={pendientesBase.length === 0}
         />
+
         {pendientes.length === 0 ? (
-          <div className="empty-list">No hay solicitudes pendientes.</div>
+          <div className="empty-list">No hay pendientes.</div>
         ) : (
-          <div className="firmante-list">
-            {pendientes.map((s) => (
-              <FirmaCard
-                key={s.id}
-                solicitud={s}
-                onFirmar={handleFirmar}
-                onRechazar={handleRechazar}
-              />
+          <div className="solicitudes-list pendientes">
+            {pendientes.map((item) => (
+              <div key={item.id}>
+                {mode === "firmas" ? (
+                  <FirmaCard
+                    solicitud={item}
+                    onFirmar={handleFirmar}
+                    onRechazar={handleRechazar}
+                  />
+                ) : mode === "tareas" ? (
+                  <TareaCard {...getCardProps(item)} />
+                ) : (
+                  <NotaCard {...getCardProps(item)} />
+                )}
+              </div>
             ))}
           </div>
         )}
 
-        <h2>Solicitudes realizadas</h2>
+        <h2>{getSectionTitle(false)}</h2>
         <ExpedienteSearch
           value={busquedaProcesadas}
           onChange={setBusquedaProcesadas}
           placeholder="Buscar por expediente..."
-          hidden={!hayNoPendientesBase}
+          hidden={noPendientesBase.length === 0}
         />
+
         {noPendientes.length === 0 ? (
-          <div className="empty-list">No hay solicitudes realizadas.</div>
+          <div className="empty-list">No hay historial.</div>
         ) : (
-          <div className="firmante-list">
-            {noPendientes.map((s) => (
-              <FirmaCard
-                key={s.id}
-                solicitud={s}
-                onFirmar={handleFirmar}
-                onRechazar={handleRechazar}
-              />
+          <div className="solicitudes-list procesadas">
+            {noPendientes.map((item) => (
+              <div key={item.id}>
+                {mode === "firmas" ? (
+                  <FirmaCard solicitud={item} />
+                ) : mode === "tareas" ? (
+                  <TareaCard {...getCardProps(item)} />
+                ) : (
+                  <NotaCard {...getCardProps(item)} />
+                )}
+              </div>
             ))}
           </div>
         )}
@@ -138,4 +287,5 @@ function DashboardFirmante() {
     </div>
   );
 }
+
 export default DashboardFirmante;

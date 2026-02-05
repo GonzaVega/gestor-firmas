@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { useAuth } from "../context/useAuth";
-import axiosInstance from "../api/axiosInstance";
+import { useAuth } from "../../context/useAuth";
+import axiosInstance from "../../api/axiosInstance";
 
 export function RoleSelector() {
   const { user, login } = useAuth();

@@ -16,9 +16,9 @@ function Login() {
       login(res.data.jwt, res.data.user);
       // Redirigir según el rol recibido
       if (res.data.user.rol === "firmante") {
-        navigate("/firmante");
+        navigate("/pendientes");
       } else {
-        navigate("/solicitante");
+        navigate("/solicitudes");
       }
     } catch (err) {
       alert("Error de autenticación");

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axiosInstance from "../api/axiosInstance";
+import axiosInstance from "../../api/axiosInstance";
 
 function NuevaSolicitudForm({ onNueva }) {
   const [usuarios, setUsuarios] = useState([]);

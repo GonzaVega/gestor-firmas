@@ -257,6 +257,7 @@
   justify-content: center;
   gap: 16px;
   margin-top: 12px;
+  width: 100%;
 }
 .firma-card .acciones button {
   font-weight: 600;
@@ -310,9 +311,15 @@
   font-size: 1rem;
   cursor: pointer;
   transition: background 0.2s;
+  position: relative;
 }
 .btn-navbar:hover {
   background: #4e5666;
+}
+.btn-navbar.active {
+  background: #535bf2;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 /* Login styles */
 .login-bg {
@@ -610,6 +617,21 @@ body {
   padding: 1rem 1.5rem;
   box-shadow: 0 1px 4px #0003;
   transition: background 0.2s;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.75rem;
+}
+
+.firma-card-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.firma-card-main:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 4px;
 }
 
 .solicitante-form-section {
@@ -639,7 +661,7 @@ body {
 
 .solicitudes-list.pendientes {
   border-radius: 8px;
-  padding: 1rem;
+  /* padding: 1rem; Removido para igualar ancho con procesadas */
 }
 .solicitudes-list.realizadas {
   border-radius: 8px;
@@ -1150,8 +1172,11 @@ body {
 
   .firma-card .acciones {
     width: 100%;
-    justify-content: flex-start;
+    justify-content: center;
     flex-wrap: wrap;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .firmante-item {
