@@ -2,8 +2,10 @@ import classNames from "classnames";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 
-function NotaCard({ nota, onMarcarLeida, isReceptor }) {
+function NotaCard({ nota, onMarcarLeida, onResponder, isReceptor }) {
   const [showModal, setShowModal] = useState(false);
+  const [isReplying, setIsReplying] = useState(false);
+  const [respuestaText, setRespuestaText] = useState("");
   const {
     id,
     expediente,
@@ -13,9 +15,12 @@ function NotaCard({ nota, onMarcarLeida, isReceptor }) {
     updated_at,
     remitente_nombre,
     destinatario_nombre,
+    respuesta,
+    respondida_el,
   } = nota;
 
   const isNoLeida = estado === "no_leida";
+  const hasRespuesta = !!respuesta;
 
   const estadoVisual = isNoLeida ? "pendiente" : "firmado";
 
@@ -87,14 +92,20 @@ function NotaCard({ nota, onMarcarLeida, isReceptor }) {
             </div>
 
             {/* Columna 4: Contenido */}
-            <div className="firma-card-col documentos">
+            <div className="firma-card-col documentos" style={{ minWidth: 0, overflow: "hidden" }}>
               <b>Nota:</b>
-              <div style={{ fontStyle: "italic", whiteSpace: "normal" }}>
+              <div 
+                style={{ 
+                  fontStyle: "italic", 
+                  whiteSpace: "normal",
+                  overflowWrap: "break-word",
+                  wordWrap: "break-word"
+                }}
+              >
                 "{contenidoMostrar}"
                 {isLongContenido && (
-                  <span style={{ color: "#60a5fa", fontWeight: 600 }}>
-                    {" "}
-                    (Click para ver más)
+                  <span style={{ color: "#60a5fa", fontWeight: 600, display: "inline-block", marginTop: "4px", fontSize: "0.85rem" }}>
+                    {" "}Ver más...
                   </span>
                 )}
               </div>
@@ -102,9 +113,36 @@ function NotaCard({ nota, onMarcarLeida, isReceptor }) {
 
             {/* Columna 5: Estado */}
             <div className="firma-card-col estado">
-              <span className={classNames("estado", estadoVisual)}>
-                {isNoLeida ? "Nueva" : "Leída"}
-              </span>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "6px",
+                  alignItems: "center",
+                }}
+              >
+                <span className={classNames("estado", estadoVisual)}>
+                  {isNoLeida ? "Nueva" : "Leída"}
+                </span>
+                {hasRespuesta && (
+                  <span
+                    style={{
+                      fontSize: "0.85rem",
+                      color: "#3b82f6",
+                      fontWeight: "bold",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      backgroundColor: "#eff6ff",
+                      padding: "2px 8px",
+                      borderRadius: "12px",
+                      border: "1px solid #bfdbfe",
+                    }}
+                  >
+                    <span>↩</span> Respondida
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           {fechaLeidaTexto && (
@@ -115,7 +153,7 @@ function NotaCard({ nota, onMarcarLeida, isReceptor }) {
         </div>
 
         {/* Acciones explícitas al pie de la tarjeta, centradas */}
-        {isReceptor && isNoLeida && onMarcarLeida && (
+        {isReceptor && (isNoLeida || (!hasRespuesta && onResponder)) && (
           <div
             className="acciones"
             style={{
@@ -126,29 +164,58 @@ function NotaCard({ nota, onMarcarLeida, isReceptor }) {
               width: "100%",
             }}
           >
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onMarcarLeida(id);
-              }}
-              className="btn-firmar"
-              style={{
-                background: "#22c55e",
-                color: "#fff",
-                border: "none",
-                borderRadius: "6px",
-                padding: "7px 16px",
-                fontWeight: "600",
-                fontSize: "1rem",
-                cursor: "pointer",
-                width: "auto",
-                minWidth: "140px",
-                whiteSpace: "nowrap",
-                textAlign: "center",
-              }}
-            >
-              Marcar como Leída
-            </button>
+            {isNoLeida && onMarcarLeida && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMarcarLeida(id);
+                }}
+                className="btn-firmar"
+                style={{
+                  background: "#22c55e",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "6px",
+                  padding: "7px 16px",
+                  fontWeight: "600",
+                  fontSize: "1rem",
+                  cursor: "pointer",
+                  width: "auto",
+                  minWidth: "140px",
+                  whiteSpace: "nowrap",
+                  textAlign: "center",
+                }}
+              >
+                Marcar como Leída
+              </button>
+            )}
+
+            {!hasRespuesta && onResponder && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowModal(true);
+                  setIsReplying(true);
+                }}
+                className="btn-firmar"
+                style={{
+                  background: "#3b82f6",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "6px",
+                  padding: "7px 16px",
+                  fontWeight: "600",
+                  fontSize: "1rem",
+                  cursor: "pointer",
+                  width: "auto",
+                  minWidth: "140px",
+                  whiteSpace: "nowrap",
+                  textAlign: "center",
+                }}
+              >
+                Responder
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -157,11 +224,21 @@ function NotaCard({ nota, onMarcarLeida, isReceptor }) {
         createPortal(
           <div
             className="modal-firma-overlay"
-            onClick={() => setShowModal(false)}
+            onClick={() => {
+              setShowModal(false);
+              setIsReplying(false);
+            }}
           >
             <div
-              className={`modal-firma modal-firma-centered modal-firma-${estadoVisual}`}
-              style={{ color: "#fff" }}
+              className={`modal-firma modal-firma-centered modal-firma-${estadoVisual} ${isReplying || hasRespuesta ? "modal-firma-wide" : ""}`}
+              style={{
+                color: "#fff",
+                maxHeight: "90vh",
+                overflowY: "auto",
+                display: "flex",
+                flexDirection: "column",
+                position: "relative",
+              }}
               onClick={(event) => event.stopPropagation()}
             >
               <div style={{ marginBottom: "1.5rem", textAlign: "center" }}>
@@ -217,18 +294,173 @@ function NotaCard({ nota, onMarcarLeida, isReceptor }) {
                 </div>
               )}
 
-              <div
-                className="comentario"
-                style={{ margin: "1rem auto 8px auto", textAlign: "left" }}
-              >
-                <b>Nota:</b> <br />"{contenido}"
+              {/* Contenedor Flex para Desktop */}
+              <div className="nota-content-wrapper">
+                {/* Columna Izquierda: Nota Original */}
+                <div className="nota-original-col">
+                  <div
+                    className="comentario"
+                    style={{
+                      margin: "1rem auto 8px auto",
+                      textAlign: "left",
+                      maxHeight:
+                        "35vh" /* Un límite razonable para no ocupar toda la altura si la nota es muuuy larga */,
+                      overflowY: "auto",
+                      paddingRight: "8px",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    <b style={{ color: "#e2e8f0" }}>
+                      Nota Original (De: {remitente_nombre || "Desconocido"}):
+                    </b>{" "}
+                    <br />"{contenido}"
+                  </div>
+                </div>
+
+                {/* Columna Derecha: Respuesta o Formulario */}
+                {(hasRespuesta || isReplying) && (
+                  <div className="nota-respuesta-col">
+                    {hasRespuesta ? (
+                      <div
+                        className="comentario"
+                        style={{
+                          margin: "1rem auto 8px auto",
+                          textAlign: "left",
+                          backgroundColor: "#eff6ff",
+                          padding: "1rem",
+                          borderRadius: "8px",
+                          border: "1px solid #bfdbfe",
+                          color: "#1e3a8a",
+                          maxHeight: "35vh",
+                          overflowY: "auto",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        <b style={{ color: "#1e40af" }}>
+                          Respuesta (De: {destinatario_nombre || "Desconocido"}
+                          ):
+                        </b>
+                        {respondida_el && (
+                          <div
+                            style={{
+                              fontSize: "0.8rem",
+                              color: "#6b7280",
+                              marginBottom: "8px",
+                            }}
+                          >
+                            Enviada el:{" "}
+                            {new Date(respondida_el).toLocaleDateString(
+                              "es-AR",
+                            )}{" "}
+                            {new Date(respondida_el).toLocaleTimeString(
+                              "es-AR",
+                              { hour12: false },
+                            )}{" "}
+                            hs.
+                          </div>
+                        )}
+                        <div
+                          style={{ whiteSpace: "pre-wrap", marginTop: "4px" }}
+                        >
+                          "{respuesta}"
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          marginTop: "1rem",
+                          textAlign: "center",
+                          width: "100%",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <label
+                          style={{
+                            display: "block",
+                            marginBottom: "4px",
+                            fontSize: "0.9rem",
+                            fontWeight: "bold",
+                            color: "#fca5a5",
+                          }}
+                        >
+                          Solo se permite una respuesta por nota
+                        </label>
+                        <textarea
+                          value={respuestaText}
+                          onChange={(e) => setRespuestaText(e.target.value)}
+                          placeholder="Escribe tu respuesta aquí..."
+                          style={{
+                            width: "100%",
+                            minHeight:
+                              "150px" /* Un poco más alto al tener su propia columna */,
+                            padding: "10px",
+                            borderRadius: "6px",
+                            border: "1px solid #475569",
+                            resize: "vertical",
+                            color:
+                              "#f8fafc" /* Gris muy clarito / casi blanco */,
+                            backgroundColor:
+                              "#1e293b" /* Fondo oscuro para que contraste con el texto claro */,
+                            display: "block",
+                            boxSizing: "border-box",
+                          }}
+                        />
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "10px",
+                            justifyContent: "center",
+                            marginTop: "10px",
+                          }}
+                        >
+                          <button
+                            className="btn-rechazar"
+                            onClick={() => setIsReplying(false)}
+                            style={{
+                              padding: "8px 16px",
+                              borderRadius: "6px",
+                              border: "none",
+                              backgroundColor: "#ef4444",
+                              color: "white",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            className="btn-firmar"
+                            onClick={() => {
+                              if (!respuestaText.trim()) return;
+                              onResponder(id, respuestaText);
+                              setShowModal(false);
+                              setIsReplying(false);
+                            }}
+                            style={{
+                              padding: "8px 16px",
+                              borderRadius: "6px",
+                              border: "none",
+                              backgroundColor: "#3b82f6",
+                              color: "white",
+                              cursor: "pointer",
+                            }}
+                            disabled={!respuestaText.trim()}
+                          >
+                            Enviar Respuesta
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
-              <div style={{ textAlign: "center" }}>
+              <div style={{ textAlign: "center", marginTop: "1rem" }}>
                 <button
                   className="btn-navbar"
-                  style={{ marginTop: 20 }}
-                  onClick={() => setShowModal(false)}
+                  onClick={() => {
+                    setShowModal(false);
+                    setIsReplying(false);
+                  }}
                 >
                   Cerrar
                 </button>

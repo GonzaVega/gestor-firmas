@@ -59,9 +59,13 @@ function BandejaEntrada() {
     axiosInstance
       .get("/notas")
       .then((res) => {
-        const data = res.data.filter(
-          (n) => String(n.destinatario_id) === String(user?.id),
-        );
+        const userId = String(user?.id);
+        const data = res.data.filter((n) => {
+          const isDestinatario = String(n.destinatario_id) === userId;
+          const isRemitente = String(n.remitente_id) === userId;
+          const hasRespuesta = !!n.respuesta;
+          return (isDestinatario && !hasRespuesta) || (isRemitente && hasRespuesta);
+        });
         setNotas(data);
       })
       .catch(() => {})
@@ -144,6 +148,20 @@ function BandejaEntrada() {
     }
   };
 
+  const handleResponderNota = async (id, respuesta) => {
+    try {
+      // Al responder, enviamos la respuesta y la nota vuelve a estar "no_leida" para el remitente
+      await axiosInstance.patch(`/notas/${id}`, { respuesta, estado: "no_leida" });
+      setNotas((prev) =>
+        prev.filter((n) => n.id !== id) // Se quita de BandejaEntrada porque ahora la tiene el remitente original en su Bandeja
+      );
+      showToast("success", "Respuesta enviada correctamente");
+      refreshCounts();
+    } catch (error) {
+      showToast("error", "Error al enviar la respuesta");
+    }
+  };
+
   if (
     loading &&
     solicitudes.length === 0 &&
@@ -199,7 +217,7 @@ function BandejaEntrada() {
         onCompletar: handleCompletarTarea,
       };
     if (mode === "notas")
-      return { nota: item, isReceptor: true, onMarcarLeida: handleLeerNota };
+      return { nota: item, isReceptor: true, onMarcarLeida: handleLeerNota, onResponder: handleResponderNota };
     return {};
   };
 
