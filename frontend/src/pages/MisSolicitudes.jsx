@@ -56,9 +56,15 @@ function MisSolicitudes() {
     axiosInstance
       .get("/notas")
       .then((res) => {
-        const data = res.data.filter(
-          (n) => !n.remitente_id || n.remitente_id === user?.id,
-        );
+        const userId = String(user?.id);
+        const data = res.data.filter((n) => {
+          const isRemitente = String(n.remitente_id) === userId;
+          const isDestinatario = String(n.destinatario_id) === userId;
+          const hasRespuesta = !!n.respuesta;
+          return (
+            (isRemitente && !hasRespuesta) || (isDestinatario && hasRespuesta)
+          );
+        });
         setNotas(data);
       })
       .catch(() => {})

@@ -101,7 +101,41 @@
   max-height: 90vh;
   overflow-y: auto;
   border: 2px solid #2563eb55;
+  transition: max-width 0.3s ease;
 }
+
+.modal-firma-wide {
+  max-width: 800px;
+  width: 90vw;
+}
+
+.nota-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .modal-firma-wide .nota-content-wrapper {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .modal-firma-wide .nota-original-col {
+    flex: 1;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    padding-right: 1.5rem;
+    min-width: 0;
+  }
+
+  .modal-firma-wide .nota-respuesta-col {
+    flex: 1;
+    padding-left: 1.5rem;
+    min-width: 0;
+  }
+}
+
 .modal-firma h2 {
   margin-top: 0;
   color: #60a5fa;
