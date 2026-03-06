@@ -30,6 +30,11 @@ class Api::V1::NotasController < ApplicationController
     # Security: Ensure user is related to the note
     nota = Note.where('remitente_id = :uid OR destinatario_id = :uid', uid: current_user.id).find(params[:id])
     
+    # Assign respondida_el automatically if a response is provided for the first time
+    if note_params[:respuesta].present? && nota.respondida_el.nil?
+      nota.respondida_el = Time.current
+    end
+
     if nota.update(note_params)
        render json: nota
     else
@@ -42,6 +47,6 @@ class Api::V1::NotasController < ApplicationController
   private
 
   def note_params
-    params.permit(:expediente, :contenido, :estado, :destinatario_id)
+    params.permit(:expediente, :contenido, :estado, :destinatario_id, :respuesta, :respondida_el)
   end
 end

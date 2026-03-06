@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_05_015904) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_05_150036) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -43,6 +43,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_05_015904) do
     t.bigint "destinatario_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "respuesta"
+    t.datetime "respondida_el"
     t.index ["destinatario_id"], name: "index_notes_on_destinatario_id"
     t.index ["remitente_id"], name: "index_notes_on_remitente_id"
   end
