@@ -92,20 +92,32 @@ function NotaCard({ nota, onMarcarLeida, onResponder, isReceptor }) {
             </div>
 
             {/* Columna 4: Contenido */}
-            <div className="firma-card-col documentos" style={{ minWidth: 0, overflow: "hidden" }}>
+            <div
+              className="firma-card-col documentos"
+              style={{ minWidth: 0, overflow: "hidden" }}
+            >
               <b>Nota:</b>
-              <div 
-                style={{ 
-                  fontStyle: "italic", 
+              <div
+                style={{
+                  fontStyle: "italic",
                   whiteSpace: "normal",
                   overflowWrap: "break-word",
-                  wordWrap: "break-word"
+                  wordWrap: "break-word",
                 }}
               >
                 "{contenidoMostrar}"
                 {isLongContenido && (
-                  <span style={{ color: "#60a5fa", fontWeight: 600, display: "inline-block", marginTop: "4px", fontSize: "0.85rem" }}>
-                    {" "}Ver más...
+                  <span
+                    style={{
+                      color: "#60a5fa",
+                      fontWeight: 600,
+                      display: "inline-block",
+                      marginTop: "4px",
+                      fontSize: "0.85rem",
+                    }}
+                  >
+                    {" "}
+                    Ver más...
                   </span>
                 )}
               </div>

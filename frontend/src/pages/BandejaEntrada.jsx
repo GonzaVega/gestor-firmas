@@ -64,7 +64,9 @@ function BandejaEntrada() {
           const isDestinatario = String(n.destinatario_id) === userId;
           const isRemitente = String(n.remitente_id) === userId;
           const hasRespuesta = !!n.respuesta;
-          return (isDestinatario && !hasRespuesta) || (isRemitente && hasRespuesta);
+          return (
+            (isDestinatario && !hasRespuesta) || (isRemitente && hasRespuesta)
+          );
         });
         setNotas(data);
       })
@@ -80,22 +82,17 @@ function BandejaEntrada() {
     if (mode === "notas") fetchNotas();
   }, [mode, fetchFirmas, fetchTareas, fetchNotas]);
 
-  // Actualiza el título de la pestaña y hace polling (background) de notificaciones
   useEffect(() => {
-    // 1. Mostrar el total en el título de forma inmediata
-    const total = (counts?.firmas || 0) + (counts?.tareas || 0) + (counts?.notas || 0);
+    const total =
+      (counts?.firmas || 0) + (counts?.tareas || 0) + (counts?.notas || 0);
     document.title = total > 0 ? `Gestiona (${total})` : "Gestiona";
 
-    // 2. Traer novedades en segundo plano cada 90 segundos
     const intervalId = setInterval(() => {
       refreshCounts();
     }, 90000);
 
-    // 3. Limpiar al desmontar para evitar fugas de memoria
     return () => {
       clearInterval(intervalId);
-      // Opcional: restaurar el título si se sale por completo de las vistas que requieren alertas, 
-      // aunque si el NotificationProvider es global, lo dejamos.
     };
   }, [counts, refreshCounts]);
 
@@ -169,11 +166,11 @@ function BandejaEntrada() {
 
   const handleResponderNota = async (id, respuesta) => {
     try {
-      // Al responder, enviamos la respuesta y la nota vuelve a estar "no_leida" para el remitente
-      await axiosInstance.patch(`/notas/${id}`, { respuesta, estado: "no_leida" });
-      setNotas((prev) =>
-        prev.filter((n) => n.id !== id) // Se quita de BandejaEntrada porque ahora la tiene el remitente original en su Bandeja
-      );
+      await axiosInstance.patch(`/notas/${id}`, {
+        respuesta,
+        estado: "no_leida",
+      });
+      setNotas((prev) => prev.filter((n) => n.id !== id));
       showToast("success", "Respuesta enviada correctamente");
       refreshCounts();
     } catch (error) {
@@ -236,7 +233,12 @@ function BandejaEntrada() {
         onCompletar: handleCompletarTarea,
       };
     if (mode === "notas")
-      return { nota: item, isReceptor: true, onMarcarLeida: handleLeerNota, onResponder: handleResponderNota };
+      return {
+        nota: item,
+        isReceptor: true,
+        onMarcarLeida: handleLeerNota,
+        onResponder: handleResponderNota,
+      };
     return {};
   };
 

@@ -82,9 +82,9 @@ function MisSolicitudes() {
     if (mode === "notas") fetchNotas();
   }, [mode, fetchFirmas, fetchTareas, fetchNotas]);
 
-  // Actualiza el título de la pestaña con las notificaciones también en esta vista
   useEffect(() => {
-    const total = (counts?.firmas || 0) + (counts?.tareas || 0) + (counts?.notas || 0);
+    const total =
+      (counts?.firmas || 0) + (counts?.tareas || 0) + (counts?.notas || 0);
     document.title = total > 0 ? `Gestiona (${total})` : "Gestiona";
   }, [counts]);
 
@@ -97,15 +97,15 @@ function MisSolicitudes() {
     if (mode === "firmas") {
       setSolicitudes((prev) => [nueva, ...prev]);
       showToast("success", "Solicitud creada correctamente");
-      fetchFirmas(); // Recargamos para obtener los nombres de los usuarios incluidos en el backend
+      fetchFirmas();
     } else if (mode === "tareas") {
       setTareas((prev) => [nueva, ...prev]);
       showToast("success", "Tarea asignada correctamente");
-      fetchTareas(); // Recargamos para obtener los nombres de los usuarios
+      fetchTareas();
     } else if (mode === "notas") {
       setNotas((prev) => [nueva, ...prev]);
       showToast("success", "Nota enviada correctamente");
-      fetchNotas(); // Recargamos para obtener los nombres de los usuarios
+      fetchNotas();
     }
   };
 

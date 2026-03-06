@@ -34,10 +34,11 @@ function NuevaTareaForm({ onNueva }) {
     const isChecked = e.target.checked;
     setVenceHoy(isChecked);
     if (isChecked) {
-      // Establece la fecha de hoy en formato YYYY-MM-DD local
       const today = new Date();
       const offset = today.getTimezoneOffset() * 60000;
-      const localToday = new Date(today.getTime() - offset).toISOString().split("T")[0];
+      const localToday = new Date(today.getTime() - offset)
+        .toISOString()
+        .split("T")[0];
       setFechaLimite(localToday);
     } else {
       setFechaLimite("");
@@ -69,8 +70,9 @@ function NuevaTareaForm({ onNueva }) {
     setLoading(true);
     setFormError("");
     try {
-      // Para evitar problemas de zona horaria (UTC atrasando un día), se envía como YYYY-MM-DDT12:00:00
-      const fechaConHoraGarantizada = fechaLimite ? `${fechaLimite}T12:00:00` : null;
+      const fechaConHoraGarantizada = fechaLimite
+        ? `${fechaLimite}T12:00:00`
+        : null;
 
       const res = await axiosInstance.post("/tareas", {
         asignado_a: asignadoId,
@@ -122,7 +124,10 @@ function NuevaTareaForm({ onNueva }) {
         <div style={{ color: "red", fontSize: "0.8em" }}>{expedienteError}</div>
       )}
 
-      <label className="toggle-row" style={{ marginTop: "0.5rem", marginBottom: "0.25rem" }}>
+      <label
+        className="toggle-row"
+        style={{ marginTop: "0.5rem", marginBottom: "0.25rem" }}
+      >
         <span>Vence hoy</span>
         <span className="toggle-switch">
           <input
