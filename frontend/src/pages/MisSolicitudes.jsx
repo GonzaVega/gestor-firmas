@@ -12,6 +12,8 @@ import ExpedienteSearch from "../components/common/ExpedienteSearch";
 import { filterByExpediente } from "../utils/filterExpedientes";
 import PaginatedList from "../components/common/PaginatedList";
 
+import { useNotifications } from "../context/NotificationContext";
+
 function MisSolicitudes() {
   const [mode, setMode] = useState("tareas");
   const [solicitudes, setSolicitudes] = useState([]);
@@ -24,6 +26,7 @@ function MisSolicitudes() {
   const [busquedaRealizadas, setBusquedaRealizadas] = useState("");
 
   const { user } = useAuth();
+  const { counts } = useNotifications();
 
   const fetchFirmas = useCallback(() => {
     setLoading(true);
@@ -79,6 +82,12 @@ function MisSolicitudes() {
     if (mode === "notas") fetchNotas();
   }, [mode, fetchFirmas, fetchTareas, fetchNotas]);
 
+  // Actualiza el título de la pestaña con las notificaciones también en esta vista
+  useEffect(() => {
+    const total = (counts?.firmas || 0) + (counts?.tareas || 0) + (counts?.notas || 0);
+    document.title = total > 0 ? `Gestiona (${total})` : "Gestiona";
+  }, [counts]);
+
   const showToast = (type, msg) => {
     setToast({ type, msg });
     setTimeout(() => setToast(null), 2000);
@@ -88,12 +97,15 @@ function MisSolicitudes() {
     if (mode === "firmas") {
       setSolicitudes((prev) => [nueva, ...prev]);
       showToast("success", "Solicitud creada correctamente");
+      fetchFirmas(); // Recargamos para obtener los nombres de los usuarios incluidos en el backend
     } else if (mode === "tareas") {
       setTareas((prev) => [nueva, ...prev]);
       showToast("success", "Tarea asignada correctamente");
+      fetchTareas(); // Recargamos para obtener los nombres de los usuarios
     } else if (mode === "notas") {
       setNotas((prev) => [nueva, ...prev]);
       showToast("success", "Nota enviada correctamente");
+      fetchNotas(); // Recargamos para obtener los nombres de los usuarios
     }
   };
 

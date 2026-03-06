@@ -80,6 +80,25 @@ function BandejaEntrada() {
     if (mode === "notas") fetchNotas();
   }, [mode, fetchFirmas, fetchTareas, fetchNotas]);
 
+  // Actualiza el título de la pestaña y hace polling (background) de notificaciones
+  useEffect(() => {
+    // 1. Mostrar el total en el título de forma inmediata
+    const total = (counts?.firmas || 0) + (counts?.tareas || 0) + (counts?.notas || 0);
+    document.title = total > 0 ? `Gestiona (${total})` : "Gestiona";
+
+    // 2. Traer novedades en segundo plano cada 90 segundos
+    const intervalId = setInterval(() => {
+      refreshCounts();
+    }, 90000);
+
+    // 3. Limpiar al desmontar para evitar fugas de memoria
+    return () => {
+      clearInterval(intervalId);
+      // Opcional: restaurar el título si se sale por completo de las vistas que requieren alertas, 
+      // aunque si el NotificationProvider es global, lo dejamos.
+    };
+  }, [counts, refreshCounts]);
+
   const handleFirmar = async (id) => {
     try {
       await axiosInstance.patch(`/firma_solicitudes/${id}`, {

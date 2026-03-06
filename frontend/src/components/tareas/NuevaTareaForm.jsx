@@ -8,6 +8,7 @@ function NuevaTareaForm({ onNueva }) {
   const [asignadoId, setAsignadoId] = useState("");
   const [expedienteNumero, setExpedienteNumero] = useState("");
   const [fechaLimite, setFechaLimite] = useState("");
+  const [venceHoy, setVenceHoy] = useState(false);
   const [descripcion, setDescripcion] = useState("");
   const [loading, setLoading] = useState(false);
   const [expedienteError, setExpedienteError] = useState("");
@@ -26,6 +27,20 @@ function NuevaTareaForm({ onNueva }) {
       setExpedienteError("Formato: ######/##");
     } else {
       setExpedienteError("");
+    }
+  };
+
+  const handleVenceHoyChange = (e) => {
+    const isChecked = e.target.checked;
+    setVenceHoy(isChecked);
+    if (isChecked) {
+      // Establece la fecha de hoy en formato YYYY-MM-DD local
+      const today = new Date();
+      const offset = today.getTimezoneOffset() * 60000;
+      const localToday = new Date(today.getTime() - offset).toISOString().split("T")[0];
+      setFechaLimite(localToday);
+    } else {
+      setFechaLimite("");
     }
   };
 
@@ -54,10 +69,13 @@ function NuevaTareaForm({ onNueva }) {
     setLoading(true);
     setFormError("");
     try {
+      // Para evitar problemas de zona horaria (UTC atrasando un día), se envía como YYYY-MM-DDT12:00:00
+      const fechaConHoraGarantizada = fechaLimite ? `${fechaLimite}T12:00:00` : null;
+
       const res = await axiosInstance.post("/tareas", {
         asignado_a: asignadoId,
         expediente: `P-${expedienteNumero}`,
-        fecha_limite: fechaLimite,
+        fecha_limite: fechaConHoraGarantizada,
         descripcion,
         estado: "pendiente",
       });
@@ -65,6 +83,7 @@ function NuevaTareaForm({ onNueva }) {
       setAsignadoId("");
       setExpedienteNumero("");
       setFechaLimite("");
+      setVenceHoy(false);
       setDescripcion("");
     } catch (err) {
       setFormError("Error al crear tarea");
@@ -103,29 +122,28 @@ function NuevaTareaForm({ onNueva }) {
         <div style={{ color: "red", fontSize: "0.8em" }}>{expedienteError}</div>
       )}
 
-      <div className="form-group" style={{ marginTop: "1rem" }}>
-        <label
-          style={{
-            display: "block",
-            fontSize: "0.9em",
-            color: "#666",
-            marginBottom: "0.3em",
-          }}
-        >
-          Fecha Límite
-        </label>
+      <label className="toggle-row" style={{ marginTop: "0.5rem", marginBottom: "0.25rem" }}>
+        <span>Vence hoy</span>
+        <span className="toggle-switch">
+          <input
+            type="checkbox"
+            checked={venceHoy}
+            onChange={handleVenceHoyChange}
+          />
+          <span className="toggle-slider" />
+        </span>
+      </label>
+
+      <div
+        className={`documentos-field ${venceHoy ? "is-hidden" : "is-visible"}`}
+        aria-hidden={venceHoy}
+      >
         <input
           type="date"
-          className="date-input"
           value={fechaLimite}
           onChange={(e) => setFechaLimite(e.target.value)}
-          required
-          style={{
-            width: "100%",
-            padding: "0.8rem",
-            border: "1px solid #ddd",
-            borderRadius: "4px",
-          }}
+          required={!venceHoy}
+          disabled={venceHoy}
         />
       </div>
 
