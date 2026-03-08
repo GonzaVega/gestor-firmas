@@ -17,11 +17,25 @@ function TareaCard({ tarea, onCompletar, isReceptor }) {
   } = tarea;
 
   const isPendiente = estado === "pendiente";
-  const vencida = isPendiente && new Date(fecha_limite) < new Date();
+
+  let vencida = false;
+  let venceHoy = false;
+
+  if (isPendiente && fecha_limite) {
+    const limite = new Date(fecha_limite);
+    const hoy = new Date();
+    
+    // Normalizamos ambas fechas a las 00:00:00 de su hora local
+    const limiteDate = new Date(limite.getFullYear(), limite.getMonth(), limite.getDate());
+    const hoyDate = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+    
+    vencida = limiteDate < hoyDate;
+    venceHoy = limiteDate.getTime() === hoyDate.getTime();
+  }
 
   let estadoVisual = "firmado";
   if (isPendiente) {
-    estadoVisual = vencida ? "rechazado" : "pendiente";
+    estadoVisual = vencida ? "rechazado" : (venceHoy ? "pendiente" : "pendiente");
   }
 
   const fechaLimiteTexto = fecha_limite
@@ -96,8 +110,8 @@ function TareaCard({ tarea, onCompletar, isReceptor }) {
                 <b>Vence:</b>{" "}
                 <span
                   style={{
-                    color: vencida ? "#ef4444" : "inherit",
-                    fontWeight: vencida ? "bold" : "normal",
+                    color: vencida ? "#ef4444" : (venceHoy ? "#eab308" : "inherit"),
+                    fontWeight: (vencida || venceHoy) ? "bold" : "normal",
                   }}
                 >
                   {fechaLimiteTexto}
@@ -122,7 +136,7 @@ function TareaCard({ tarea, onCompletar, isReceptor }) {
             {/* Columna 5: Estado */}
             <div className="firma-card-col estado">
               <span className={classNames("estado", estadoVisual)}>
-                {vencida ? "Vencida" : isPendiente ? "Pendiente" : "Completada"}
+                {vencida ? "Vencida" : (venceHoy ? "¡Vence hoy!" : (isPendiente ? "Pendiente" : "Completada"))}
               </span>
             </div>
           </div>

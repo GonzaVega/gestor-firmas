@@ -16,7 +16,12 @@ export function useNotifications() {
 
 export function NotificationProvider({ children }) {
   const { user } = useAuth();
-  const [counts, setCounts] = useState({ firmas: 0, tareas: 0, notas: 0 });
+  const [counts, setCounts] = useState({ 
+    firmas: 0, 
+    tareas: 0, 
+    notasBandeja: 0,
+    notasMisSolicitudes: 0,
+  });
   const [loading, setLoading] = useState(false);
 
   const fetchCounts = useCallback(async () => {
@@ -31,7 +36,8 @@ export function NotificationProvider({ children }) {
 
       let nuevasFirmas = 0;
       let nuevasTareas = 0;
-      let nuevasNotas = 0;
+      let notasBandeja = 0;
+      let notasMisSolicitudes = 0;
 
       if (firmasRes.status === "fulfilled") {
         nuevasFirmas = firmasRes.value.data.filter(
@@ -50,17 +56,29 @@ export function NotificationProvider({ children }) {
       }
 
       if (notasRes.status === "fulfilled") {
-        nuevasNotas = notasRes.value.data.filter(
+        const notasData = notasRes.value.data;
+        notasBandeja = notasData.filter(
           (n) =>
             String(n.destinatario_id) === String(user.id) &&
-            n.estado === "no_leida",
+            n.estado_destinatario === "no_leida",
+        ).length;
+
+        notasMisSolicitudes = notasData.filter(
+          (n) => {
+            const esRemitente = String(n.remitente_id) === String(user.id);
+            const leidaSinRespuesta =
+              !n.respuesta &&
+              (n.estado_destinatario === "leida" || n.estado_destinatario === "archivada");
+            return esRemitente && !leidaSinRespuesta && n.estado_remitente === "respuesta_no_leida";
+          },
         ).length;
       }
 
       setCounts({
         firmas: nuevasFirmas,
         tareas: nuevasTareas,
-        notas: nuevasNotas,
+        notasBandeja,
+        notasMisSolicitudes,
       });
     } catch (error) {
       console.error("Error fetching notification counts", error);
@@ -73,7 +91,7 @@ export function NotificationProvider({ children }) {
       const interval = setInterval(fetchCounts, 30000);
       return () => clearInterval(interval);
     } else {
-      setCounts({ firmas: 0, tareas: 0, notas: 0 });
+      setCounts({ firmas: 0, tareas: 0, notasBandeja: 0, notasMisSolicitudes: 0 });
     }
   }, [user, fetchCounts]);
 

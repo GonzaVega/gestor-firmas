@@ -12,7 +12,8 @@ function Header() {
   if (!user) return null;
 
   const isActive = (path) => (location.pathname === path ? "active" : "");
-  const totalPendientes = counts.firmas + counts.tareas + counts.notas;
+  const totalBandeja = (counts.firmas || 0) + (counts.tareas || 0) + (counts.notasBandeja || 0);
+  const totalMisSolicitudes = counts.notasMisSolicitudes || 0;
 
   return (
     <nav className="navbar-app">
@@ -21,8 +22,12 @@ function Header() {
         <button
           className={`btn-navbar ${isActive("/solicitudes")}`}
           onClick={() => navigate("/solicitudes")}
+          style={{ position: "relative" }}
         >
           Mis Solicitudes
+          {totalMisSolicitudes > 0 && (
+            <span className="navbar-badge">{totalMisSolicitudes}</span>
+          )}
         </button>
         <button
           className={`btn-navbar ${isActive("/bandejaentrada")}`}
@@ -30,8 +35,8 @@ function Header() {
           style={{ position: "relative" }}
         >
           Bandeja de Entrada
-          {totalPendientes > 0 && (
-            <span className="navbar-badge">{totalPendientes}</span>
+          {totalBandeja > 0 && (
+            <span className="navbar-badge">{totalBandeja}</span>
           )}
         </button>
       </div>
