@@ -16,9 +16,9 @@ export function useNotifications() {
 
 export function NotificationProvider({ children }) {
   const { user } = useAuth();
-  const [counts, setCounts] = useState({ 
-    firmas: 0, 
-    tareas: 0, 
+  const [counts, setCounts] = useState({
+    firmas: 0,
+    tareas: 0,
     notasBandeja: 0,
     notasMisSolicitudes: 0,
   });
@@ -63,15 +63,18 @@ export function NotificationProvider({ children }) {
             n.estado_destinatario === "no_leida",
         ).length;
 
-        notasMisSolicitudes = notasData.filter(
-          (n) => {
-            const esRemitente = String(n.remitente_id) === String(user.id);
-            const leidaSinRespuesta =
-              !n.respuesta &&
-              (n.estado_destinatario === "leida" || n.estado_destinatario === "archivada");
-            return esRemitente && !leidaSinRespuesta && n.estado_remitente === "respuesta_no_leida";
-          },
-        ).length;
+        notasMisSolicitudes = notasData.filter((n) => {
+          const esRemitente = String(n.remitente_id) === String(user.id);
+          const leidaSinRespuesta =
+            !n.respuesta &&
+            (n.estado_destinatario === "leida" ||
+              n.estado_destinatario === "archivada");
+          return (
+            esRemitente &&
+            !leidaSinRespuesta &&
+            n.estado_remitente === "respuesta_no_leida"
+          );
+        }).length;
       }
 
       setCounts({
@@ -91,7 +94,12 @@ export function NotificationProvider({ children }) {
       const interval = setInterval(fetchCounts, 30000);
       return () => clearInterval(interval);
     } else {
-      setCounts({ firmas: 0, tareas: 0, notasBandeja: 0, notasMisSolicitudes: 0 });
+      setCounts({
+        firmas: 0,
+        tareas: 0,
+        notasBandeja: 0,
+        notasMisSolicitudes: 0,
+      });
     }
   }, [user, fetchCounts]);
 

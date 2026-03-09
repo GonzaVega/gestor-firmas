@@ -29,52 +29,61 @@ function BandejaEntrada() {
     setTimeout(() => setToast(null), 2000);
   };
 
-  const fetchFirmas = useCallback((silent = false) => {
-    if (!silent) setLoading(true);
-    axiosInstance
-      .get("/firma_solicitudes")
-      .then((res) => {
-        const data = res.data.filter((s) => s.firmante_id === user?.id);
-        setSolicitudes(data);
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (!silent) setLoading(false);
-      });
-  }, [user]);
+  const fetchFirmas = useCallback(
+    (silent = false) => {
+      if (!silent) setLoading(true);
+      axiosInstance
+        .get("/firma_solicitudes")
+        .then((res) => {
+          const data = res.data.filter((s) => s.firmante_id === user?.id);
+          setSolicitudes(data);
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (!silent) setLoading(false);
+        });
+    },
+    [user],
+  );
 
-  const fetchTareas = useCallback((silent = false) => {
-    if (!silent) setLoading(true);
-    axiosInstance
-      .get("/tareas")
-      .then((res) => {
-        const data = res.data.filter(
-          (t) => String(t.asignado_a) === String(user?.id),
-        );
-        setTareas(data);
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (!silent) setLoading(false);
-      });
-  }, [user]);
+  const fetchTareas = useCallback(
+    (silent = false) => {
+      if (!silent) setLoading(true);
+      axiosInstance
+        .get("/tareas")
+        .then((res) => {
+          const data = res.data.filter(
+            (t) => String(t.asignado_a) === String(user?.id),
+          );
+          setTareas(data);
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (!silent) setLoading(false);
+        });
+    },
+    [user],
+  );
 
-  const fetchNotas = useCallback((silent = false) => {
-    if (!silent) setLoading(true);
-    axiosInstance
-      .get("/notas")
-      .then((res) => {
-        const userId = String(user?.id);
-        const data = res.data.filter(
-          (n) => String(n.destinatario_id) === userId,
-        );
-        setNotas(data);
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (!silent) setLoading(false);
-      });
-  }, [user]);
+  const fetchNotas = useCallback(
+    (silent = false) => {
+      if (!silent) setLoading(true);
+      axiosInstance
+        .get("/notas")
+        .then((res) => {
+          const userId = String(user?.id);
+          const data = res.data.filter(
+            (n) => String(n.destinatario_id) === userId,
+          );
+          setNotas(data);
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (!silent) setLoading(false);
+        });
+    },
+    [user],
+  );
 
   useEffect(() => {
     setBusquedaPendientes("");
@@ -87,10 +96,11 @@ function BandejaEntrada() {
   // Auto-refresh silencioso cuando cambian los counts sin interrumpir interacción
   useEffect(() => {
     const checkInteraction = () => {
-      const hasModal = document.querySelector('.modal-firma-overlay') !== null;
-      const hasActiveInput = document.activeElement?.tagName === 'INPUT' ||
-                            document.activeElement?.tagName === 'TEXTAREA' ||
-                            document.activeElement?.tagName === 'SELECT';
+      const hasModal = document.querySelector(".modal-firma-overlay") !== null;
+      const hasActiveInput =
+        document.activeElement?.tagName === "INPUT" ||
+        document.activeElement?.tagName === "TEXTAREA" ||
+        document.activeElement?.tagName === "SELECT";
       setIsUserInteracting(hasModal || hasActiveInput);
     };
 
@@ -101,7 +111,11 @@ function BandejaEntrada() {
 
   // Actualiza el título de la pestaña y hace polling (background) de notificaciones
   useEffect(() => {
-    const total = (counts?.firmas || 0) + (counts?.tareas || 0) + (counts?.notasBandeja || 0) + (counts?.notasMisSolicitudes || 0);
+    const total =
+      (counts?.firmas || 0) +
+      (counts?.tareas || 0) +
+      (counts?.notasBandeja || 0) +
+      (counts?.notasMisSolicitudes || 0);
     document.title = total > 0 ? `Gestiona (${total})` : "Gestiona";
 
     const intervalId = setInterval(() => {
@@ -120,7 +134,16 @@ function BandejaEntrada() {
       if (mode === "tareas") fetchTareas(true);
       if (mode === "notas") fetchNotas(true);
     }
-  }, [counts.firmas, counts.tareas, counts.notasBandeja, isUserInteracting, mode, fetchFirmas, fetchTareas, fetchNotas]);
+  }, [
+    counts.firmas,
+    counts.tareas,
+    counts.notasBandeja,
+    isUserInteracting,
+    mode,
+    fetchFirmas,
+    fetchTareas,
+    fetchNotas,
+  ]);
 
   const handleFirmar = async (id) => {
     try {
@@ -217,7 +240,7 @@ function BandejaEntrada() {
                 respondida_el: new Date().toISOString(),
               }
             : n,
-        )
+        ),
       );
       showToast("success", "Respuesta enviada correctamente");
       refreshCounts();
@@ -281,7 +304,12 @@ function BandejaEntrada() {
         onCompletar: handleCompletarTarea,
       };
     if (mode === "notas")
-      return { nota: item, isReceptor: true, onMarcarLeida: handleLeerNota, onResponder: handleResponderNota };
+      return {
+        nota: item,
+        isReceptor: true,
+        onMarcarLeida: handleLeerNota,
+        onResponder: handleResponderNota,
+      };
     return {};
   };
 
@@ -298,14 +326,14 @@ function BandejaEntrada() {
     <div className="dashboard-firmante">
       {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
 
-      <ModeSelector 
-        currentMode={mode} 
-        onModeChange={setMode} 
+      <ModeSelector
+        currentMode={mode}
+        onModeChange={setMode}
         badges={{
           firmas: counts.firmas,
           tareas: counts.tareas,
           notas: counts.notasBandeja,
-        }} 
+        }}
       />
 
       <div className="firmante-list-section fade-in" key={mode}>

@@ -29,50 +29,61 @@ function MisSolicitudes() {
   const { user } = useAuth();
   const { counts, refreshCounts } = useNotifications();
 
-  const fetchFirmas = useCallback((silent = false) => {
-    if (!silent) setLoading(true);
-    axiosInstance
-      .get("/firma_solicitudes")
-      .then((res) => {
-        const data = res.data.filter((s) => s.solicitante_id === user?.id);
-        setSolicitudes(data);
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (!silent) setLoading(false);
-      });
-  }, [user]);
+  const fetchFirmas = useCallback(
+    (silent = false) => {
+      if (!silent) setLoading(true);
+      axiosInstance
+        .get("/firma_solicitudes")
+        .then((res) => {
+          const data = res.data.filter((s) => s.solicitante_id === user?.id);
+          setSolicitudes(data);
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (!silent) setLoading(false);
+        });
+    },
+    [user],
+  );
 
-  const fetchTareas = useCallback((silent = false) => {
-    if (!silent) setLoading(true);
-    axiosInstance
-      .get("/tareas")
-      .then((res) => {
-        const data = res.data.filter(
-          (t) => !t.solicitante_id || t.solicitante_id === user?.id,
-        );
-        setTareas(data);
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (!silent) setLoading(false);
-      });
-  }, [user]);
+  const fetchTareas = useCallback(
+    (silent = false) => {
+      if (!silent) setLoading(true);
+      axiosInstance
+        .get("/tareas")
+        .then((res) => {
+          const data = res.data.filter(
+            (t) => !t.solicitante_id || t.solicitante_id === user?.id,
+          );
+          setTareas(data);
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (!silent) setLoading(false);
+        });
+    },
+    [user],
+  );
 
-  const fetchNotas = useCallback((silent = false) => {
-    if (!silent) setLoading(true);
-    axiosInstance
-      .get("/notas")
-      .then((res) => {
-        const userId = String(user?.id);
-        const data = res.data.filter((n) => String(n.remitente_id) === userId);
-        setNotas(data);
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (!silent) setLoading(false);
-      });
-  }, [user]);
+  const fetchNotas = useCallback(
+    (silent = false) => {
+      if (!silent) setLoading(true);
+      axiosInstance
+        .get("/notas")
+        .then((res) => {
+          const userId = String(user?.id);
+          const data = res.data.filter(
+            (n) => String(n.remitente_id) === userId,
+          );
+          setNotas(data);
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (!silent) setLoading(false);
+        });
+    },
+    [user],
+  );
 
   useEffect(() => {
     setBusquedaPendientes("");
@@ -85,10 +96,11 @@ function MisSolicitudes() {
   // Auto-refresh silencioso cuando cambian los counts sin interrumpir interacción
   useEffect(() => {
     const checkInteraction = () => {
-      const hasModal = document.querySelector('.modal-firma-overlay') !== null;
-      const hasActiveInput = document.activeElement?.tagName === 'INPUT' ||
-                            document.activeElement?.tagName === 'TEXTAREA' ||
-                            document.activeElement?.tagName === 'SELECT';
+      const hasModal = document.querySelector(".modal-firma-overlay") !== null;
+      const hasActiveInput =
+        document.activeElement?.tagName === "INPUT" ||
+        document.activeElement?.tagName === "TEXTAREA" ||
+        document.activeElement?.tagName === "SELECT";
       setIsUserInteracting(hasModal || hasActiveInput);
     };
 
@@ -99,7 +111,11 @@ function MisSolicitudes() {
 
   // Actualiza el título de la pestaña con las notificaciones también en esta vista
   useEffect(() => {
-    const total = (counts?.firmas || 0) + (counts?.tareas || 0) + (counts?.notasBandeja || 0) + (counts?.notasMisSolicitudes || 0);
+    const total =
+      (counts?.firmas || 0) +
+      (counts?.tareas || 0) +
+      (counts?.notasBandeja || 0) +
+      (counts?.notasMisSolicitudes || 0);
     document.title = total > 0 ? `Gestiona (${total})` : "Gestiona";
   }, [counts]);
 
@@ -110,7 +126,16 @@ function MisSolicitudes() {
       if (mode === "tareas") fetchTareas(true);
       if (mode === "notas") fetchNotas(true);
     }
-  }, [counts.firmas, counts.tareas, counts.notasMisSolicitudes, isUserInteracting, mode, fetchFirmas, fetchTareas, fetchNotas]);
+  }, [
+    counts.firmas,
+    counts.tareas,
+    counts.notasMisSolicitudes,
+    isUserInteracting,
+    mode,
+    fetchFirmas,
+    fetchTareas,
+    fetchNotas,
+  ]);
 
   // Refresh adicional de notas cuando cambia el contador, independiente del modo actual
   useEffect(() => {
@@ -180,7 +205,8 @@ function MisSolicitudes() {
     const estaArchivadaParaRemitente = (n) => {
       const leidaSinRespuesta =
         !n.respuesta &&
-        (n.estado_destinatario === "leida" || n.estado_destinatario === "archivada");
+        (n.estado_destinatario === "leida" ||
+          n.estado_destinatario === "archivada");
       return n.estado_remitente === "archivada" || leidaSinRespuesta;
     };
     pendientes = notas.filter((n) => !estaArchivadaParaRemitente(n));
@@ -227,14 +253,14 @@ function MisSolicitudes() {
     <div className="dashboard-solicitante">
       {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
 
-      <ModeSelector 
-        currentMode={mode} 
-        onModeChange={setMode} 
+      <ModeSelector
+        currentMode={mode}
+        onModeChange={setMode}
         badges={{
           firmas: counts.firmas,
           tareas: counts.tareas,
           notas: counts.notasMisSolicitudes,
-        }} 
+        }}
       />
 
       <div className="solicitante-form-section fade-in" key={`${mode}-form`}>

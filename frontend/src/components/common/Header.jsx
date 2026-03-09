@@ -12,7 +12,8 @@ function Header() {
   if (!user) return null;
 
   const isActive = (path) => (location.pathname === path ? "active" : "");
-  const totalBandeja = (counts.firmas || 0) + (counts.tareas || 0) + (counts.notasBandeja || 0);
+  const totalBandeja =
+    (counts.firmas || 0) + (counts.tareas || 0) + (counts.notasBandeja || 0);
   const totalMisSolicitudes = counts.notasMisSolicitudes || 0;
 
   return (

@@ -27,13 +27,14 @@ function NotaCard({ nota, onMarcarLeida, onResponder, isReceptor }) {
   const isNoLeida = isReceptor
     ? estadoDestinatarioActual === "no_leida"
     : estadoRemitenteActual === "respuesta_no_leida";
-  
+
   // Para remitente: si no hay respuesta y destinatario ya leyó → mostrar como completado
-  const notaLeidaSinRespuesta = 
-    !isReceptor && 
-    !hasRespuesta && 
-    (estadoDestinatarioActual === "leida" || estadoDestinatarioActual === "archivada");
-  
+  const notaLeidaSinRespuesta =
+    !isReceptor &&
+    !hasRespuesta &&
+    (estadoDestinatarioActual === "leida" ||
+      estadoDestinatarioActual === "archivada");
+
   const isPendienteRemitente =
     estadoRemitenteActual === "respuesta_no_leida" ||
     (estadoRemitenteActual === "pendiente" && !notaLeidaSinRespuesta);
@@ -55,7 +56,7 @@ function NotaCard({ nota, onMarcarLeida, onResponder, isReceptor }) {
         ? "Nueva respuesta"
         : "Respuesta leída"
       : estadoRemitenteActual === "archivada"
-        ? "Leída / Sin respuesta"
+        ? "Leída"
         : "En espera";
 
   const fechaCreacionTexto = created_at
@@ -130,20 +131,32 @@ function NotaCard({ nota, onMarcarLeida, onResponder, isReceptor }) {
             </div>
 
             {/* Columna 4: Contenido */}
-            <div className="firma-card-col documentos" style={{ minWidth: 0, overflow: "hidden" }}>
+            <div
+              className="firma-card-col documentos"
+              style={{ minWidth: 0, overflow: "hidden" }}
+            >
               <b>Nota:</b>
-              <div 
-                style={{ 
-                  fontStyle: "italic", 
+              <div
+                style={{
+                  fontStyle: "italic",
                   whiteSpace: "normal",
                   overflowWrap: "break-word",
-                  wordWrap: "break-word"
+                  wordWrap: "break-word",
                 }}
               >
                 "{contenidoMostrar}"
                 {isLongContenido && (
-                  <span style={{ color: "#60a5fa", fontWeight: 600, display: "inline-block", marginTop: "4px", fontSize: "0.85rem" }}>
-                    {" "}Ver más...
+                  <span
+                    style={{
+                      color: "#60a5fa",
+                      fontWeight: 600,
+                      display: "inline-block",
+                      marginTop: "4px",
+                      fontSize: "0.85rem",
+                    }}
+                  >
+                    {" "}
+                    Ver más...
                   </span>
                 )}
               </div>
@@ -203,7 +216,8 @@ function NotaCard({ nota, onMarcarLeida, onResponder, isReceptor }) {
         </div>
 
         {/* Acciones explícitas al pie de la tarjeta, centradas */}
-        {(isReceptor || (!isReceptor && hasRespuesta && isNoLeida && onMarcarLeida)) && (
+        {(isReceptor ||
+          (!isReceptor && hasRespuesta && isNoLeida && onMarcarLeida)) && (
           <div
             className="acciones"
             style={{
@@ -236,7 +250,9 @@ function NotaCard({ nota, onMarcarLeida, onResponder, isReceptor }) {
                   textAlign: "center",
                 }}
               >
-                {isReceptor ? "Marcar como Leída" : "Marcar respuesta como Leída"}
+                {isReceptor
+                  ? "Marcar como Leída"
+                  : "Marcar respuesta como Leída"}
               </button>
             )}
 
