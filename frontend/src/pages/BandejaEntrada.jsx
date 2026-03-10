@@ -20,6 +20,7 @@ function BandejaEntrada() {
 
   const [busquedaPendientes, setBusquedaPendientes] = useState("");
   const [busquedaProcesadas, setBusquedaProcesadas] = useState("");
+  const [isUserInteracting, setIsUserInteracting] = useState(false);
 
   const { user } = useAuth();
   const { refreshCounts, counts } = useNotifications();
@@ -28,51 +29,61 @@ function BandejaEntrada() {
     setTimeout(() => setToast(null), 2000);
   };
 
-  const fetchFirmas = useCallback(() => {
-    setLoading(true);
-    axiosInstance
-      .get("/firma_solicitudes")
-      .then((res) => {
-        const data = res.data.filter((s) => s.firmante_id === user?.id);
-        setSolicitudes(data);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [user]);
-
-  const fetchTareas = useCallback(() => {
-    setLoading(true);
-    axiosInstance
-      .get("/tareas")
-      .then((res) => {
-        const data = res.data.filter(
-          (t) => String(t.asignado_a) === String(user?.id),
-        );
-        setTareas(data);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [user]);
-
-  const fetchNotas = useCallback(() => {
-    setLoading(true);
-    axiosInstance
-      .get("/notas")
-      .then((res) => {
-        const userId = String(user?.id);
-        const data = res.data.filter((n) => {
-          const isDestinatario = String(n.destinatario_id) === userId;
-          const isRemitente = String(n.remitente_id) === userId;
-          const hasRespuesta = !!n.respuesta;
-          return (
-            (isDestinatario && !hasRespuesta) || (isRemitente && hasRespuesta)
-          );
+  const fetchFirmas = useCallback(
+    (silent = false) => {
+      if (!silent) setLoading(true);
+      axiosInstance
+        .get("/firma_solicitudes")
+        .then((res) => {
+          const data = res.data.filter((s) => s.firmante_id === user?.id);
+          setSolicitudes(data);
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (!silent) setLoading(false);
         });
-        setNotas(data);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [user]);
+    },
+    [user],
+  );
+
+  const fetchTareas = useCallback(
+    (silent = false) => {
+      if (!silent) setLoading(true);
+      axiosInstance
+        .get("/tareas")
+        .then((res) => {
+          const data = res.data.filter(
+            (t) => String(t.asignado_a) === String(user?.id),
+          );
+          setTareas(data);
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (!silent) setLoading(false);
+        });
+    },
+    [user],
+  );
+
+  const fetchNotas = useCallback(
+    (silent = false) => {
+      if (!silent) setLoading(true);
+      axiosInstance
+        .get("/notas")
+        .then((res) => {
+          const userId = String(user?.id);
+          const data = res.data.filter(
+            (n) => String(n.destinatario_id) === userId,
+          );
+          setNotas(data);
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (!silent) setLoading(false);
+        });
+    },
+    [user],
+  );
 
   useEffect(() => {
     setBusquedaPendientes("");
@@ -82,9 +93,29 @@ function BandejaEntrada() {
     if (mode === "notas") fetchNotas();
   }, [mode, fetchFirmas, fetchTareas, fetchNotas]);
 
+  // Auto-refresh silencioso cuando cambian los counts sin interrumpir interacción
+  useEffect(() => {
+    const checkInteraction = () => {
+      const hasModal = document.querySelector(".modal-firma-overlay") !== null;
+      const hasActiveInput =
+        document.activeElement?.tagName === "INPUT" ||
+        document.activeElement?.tagName === "TEXTAREA" ||
+        document.activeElement?.tagName === "SELECT";
+      setIsUserInteracting(hasModal || hasActiveInput);
+    };
+
+    checkInteraction();
+    const intervalCheck = setInterval(checkInteraction, 500);
+    return () => clearInterval(intervalCheck);
+  }, []);
+
+  // Actualiza el título de la pestaña y hace polling (background) de notificaciones
   useEffect(() => {
     const total =
-      (counts?.firmas || 0) + (counts?.tareas || 0) + (counts?.notas || 0);
+      (counts?.firmas || 0) +
+      (counts?.tareas || 0) +
+      (counts?.notasBandeja || 0) +
+      (counts?.notasMisSolicitudes || 0);
     document.title = total > 0 ? `Gestiona (${total})` : "Gestiona";
 
     const intervalId = setInterval(() => {
@@ -95,6 +126,24 @@ function BandejaEntrada() {
       clearInterval(intervalId);
     };
   }, [counts, refreshCounts]);
+
+  // Silent refresh cuando aumentan los counts sin interrumpir usuario
+  useEffect(() => {
+    if (!isUserInteracting) {
+      if (mode === "firmas") fetchFirmas(true);
+      if (mode === "tareas") fetchTareas(true);
+      if (mode === "notas") fetchNotas(true);
+    }
+  }, [
+    counts.firmas,
+    counts.tareas,
+    counts.notasBandeja,
+    isUserInteracting,
+    mode,
+    fetchFirmas,
+    fetchTareas,
+    fetchNotas,
+  ]);
 
   const handleFirmar = async (id) => {
     try {
@@ -153,9 +202,19 @@ function BandejaEntrada() {
 
   const handleLeerNota = async (id) => {
     try {
-      await axiosInstance.patch(`/notas/${id}`, { estado: "leida" });
+      await axiosInstance.patch(`/notas/${id}`, {
+        action_type: "marcar_leida_destinatario",
+      });
       setNotas((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, estado: "leida" } : n)),
+        prev.map((n) =>
+          n.id === id
+            ? {
+                ...n,
+                estado_destinatario: "leida",
+                estado_remitente: "archivada",
+              }
+            : n,
+        ),
       );
       showToast("success", "Nota marcada como leída");
       refreshCounts();
@@ -167,10 +226,22 @@ function BandejaEntrada() {
   const handleResponderNota = async (id, respuesta) => {
     try {
       await axiosInstance.patch(`/notas/${id}`, {
+        action_type: "responder",
         respuesta,
-        estado: "no_leida",
       });
-      setNotas((prev) => prev.filter((n) => n.id !== id));
+      setNotas((prev) =>
+        prev.map((n) =>
+          n.id === id
+            ? {
+                ...n,
+                respuesta,
+                estado_destinatario: "archivada",
+                estado_remitente: "respuesta_no_leida",
+                respondida_el: new Date().toISOString(),
+              }
+            : n,
+        ),
+      );
       showToast("success", "Respuesta enviada correctamente");
       refreshCounts();
     } catch (error) {
@@ -208,10 +279,10 @@ function BandejaEntrada() {
     PendienteComponent = TareaCard;
   } else if (mode === "notas") {
     pendientesBase = notas
-      .filter((n) => n.estado === "no_leida")
+      .filter((n) => n.estado_destinatario === "no_leida")
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     noPendientesBase = notas
-      .filter((n) => n.estado !== "no_leida")
+      .filter((n) => n.estado_destinatario !== "no_leida")
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     PendienteComponent = NotaCard;
   }
@@ -255,7 +326,15 @@ function BandejaEntrada() {
     <div className="dashboard-firmante">
       {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
 
-      <ModeSelector currentMode={mode} onModeChange={setMode} badges={counts} />
+      <ModeSelector
+        currentMode={mode}
+        onModeChange={setMode}
+        badges={{
+          firmas: counts.firmas,
+          tareas: counts.tareas,
+          notas: counts.notasBandeja,
+        }}
+      />
 
       <div className="firmante-list-section fade-in" key={mode}>
         <h2>{getSectionTitle(true)}</h2>

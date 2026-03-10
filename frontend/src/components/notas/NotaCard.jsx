@@ -11,6 +11,8 @@ function NotaCard({ nota, onMarcarLeida, onResponder, isReceptor }) {
     expediente,
     contenido,
     estado,
+    estado_destinatario,
+    estado_remitente,
     created_at,
     updated_at,
     remitente_nombre,
@@ -19,17 +21,54 @@ function NotaCard({ nota, onMarcarLeida, onResponder, isReceptor }) {
     respondida_el,
   } = nota;
 
-  const isNoLeida = estado === "no_leida";
+  const estadoDestinatarioActual = estado_destinatario || estado;
+  const estadoRemitenteActual = estado_remitente || estado;
   const hasRespuesta = !!respuesta;
+  const isNoLeida = isReceptor
+    ? estadoDestinatarioActual === "no_leida"
+    : estadoRemitenteActual === "respuesta_no_leida";
 
-  const estadoVisual = isNoLeida ? "pendiente" : "firmado";
+  // Para remitente: si no hay respuesta y destinatario ya leyó → mostrar como completado
+  const notaLeidaSinRespuesta =
+    !isReceptor &&
+    !hasRespuesta &&
+    (estadoDestinatarioActual === "leida" ||
+      estadoDestinatarioActual === "archivada");
+
+  const isPendienteRemitente =
+    estadoRemitenteActual === "respuesta_no_leida" ||
+    (estadoRemitenteActual === "pendiente" && !notaLeidaSinRespuesta);
+
+  const estadoVisual = isReceptor
+    ? estadoDestinatarioActual === "no_leida"
+      ? "pendiente"
+      : "firmado"
+    : isPendienteRemitente
+      ? "pendiente"
+      : "firmado";
+
+  const estadoTexto = isReceptor
+    ? isNoLeida
+      ? "Nueva"
+      : "Leída"
+    : hasRespuesta
+      ? isNoLeida
+        ? "Nueva respuesta"
+        : "Respuesta leída"
+      : estadoRemitenteActual === "archivada"
+        ? "Leída"
+        : "En espera";
 
   const fechaCreacionTexto = created_at
     ? new Date(created_at).toLocaleDateString("es-AR")
     : "-";
 
+  const mostrarFechaLeida = isReceptor
+    ? estadoDestinatarioActual !== "no_leida"
+    : estadoRemitenteActual === "archivada";
+
   const fechaLeidaTexto =
-    !isNoLeida && updated_at
+    mostrarFechaLeida && updated_at
       ? `${new Date(updated_at).toLocaleDateString("es-AR")} ${new Date(updated_at).toLocaleTimeString("es-AR", { hour12: false })} hs.`
       : null;
 
@@ -134,7 +173,7 @@ function NotaCard({ nota, onMarcarLeida, onResponder, isReceptor }) {
                 }}
               >
                 <span className={classNames("estado", estadoVisual)}>
-                  {isNoLeida ? "Nueva" : "Leída"}
+                  {estadoTexto}
                 </span>
                 {hasRespuesta && (
                   <span
@@ -154,6 +193,18 @@ function NotaCard({ nota, onMarcarLeida, onResponder, isReceptor }) {
                     <span>↩</span> Respondida
                   </span>
                 )}
+                {notaLeidaSinRespuesta && (
+                  <span
+                    style={{
+                      fontSize: "0.8rem",
+                      color: "#9ca3af",
+                      fontWeight: "500",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    Sin respuesta
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -165,7 +216,8 @@ function NotaCard({ nota, onMarcarLeida, onResponder, isReceptor }) {
         </div>
 
         {/* Acciones explícitas al pie de la tarjeta, centradas */}
-        {isReceptor && (isNoLeida || (!hasRespuesta && onResponder)) && (
+        {(isReceptor ||
+          (!isReceptor && hasRespuesta && isNoLeida && onMarcarLeida)) && (
           <div
             className="acciones"
             style={{
@@ -198,11 +250,13 @@ function NotaCard({ nota, onMarcarLeida, onResponder, isReceptor }) {
                   textAlign: "center",
                 }}
               >
-                Marcar como Leída
+                {isReceptor
+                  ? "Marcar como Leída"
+                  : "Marcar respuesta como Leída"}
               </button>
             )}
 
-            {!hasRespuesta && onResponder && (
+            {isReceptor && !hasRespuesta && onResponder && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -277,12 +331,27 @@ function NotaCard({ nota, onMarcarLeida, onResponder, isReceptor }) {
                 style={{
                   marginBottom: 18,
                   display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "8px",
                   justifyContent: "center",
                 }}
               >
                 <div className={`modal-estado-box ${estadoVisual}`}>
-                  {isNoLeida ? "Nueva" : "Leída"}
+                  {estadoTexto}
                 </div>
+                {notaLeidaSinRespuesta && (
+                  <div
+                    style={{
+                      fontSize: "0.85rem",
+                      color: "#94a3b8",
+                      fontWeight: "500",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    Sin respuesta
+                  </div>
+                )}
               </div>
 
               <div style={{ marginBottom: 8, textAlign: "center" }}>

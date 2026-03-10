@@ -24,55 +24,66 @@ function MisSolicitudes() {
 
   const [busquedaPendientes, setBusquedaPendientes] = useState("");
   const [busquedaRealizadas, setBusquedaRealizadas] = useState("");
+  const [isUserInteracting, setIsUserInteracting] = useState(false);
 
   const { user } = useAuth();
-  const { counts } = useNotifications();
+  const { counts, refreshCounts } = useNotifications();
 
-  const fetchFirmas = useCallback(() => {
-    setLoading(true);
-    axiosInstance
-      .get("/firma_solicitudes")
-      .then((res) => {
-        const data = res.data.filter((s) => s.solicitante_id === user?.id);
-        setSolicitudes(data);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [user]);
-
-  const fetchTareas = useCallback(() => {
-    setLoading(true);
-    axiosInstance
-      .get("/tareas")
-      .then((res) => {
-        const data = res.data.filter(
-          (t) => !t.solicitante_id || t.solicitante_id === user?.id,
-        );
-        setTareas(data);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [user]);
-
-  const fetchNotas = useCallback(() => {
-    setLoading(true);
-    axiosInstance
-      .get("/notas")
-      .then((res) => {
-        const userId = String(user?.id);
-        const data = res.data.filter((n) => {
-          const isRemitente = String(n.remitente_id) === userId;
-          const isDestinatario = String(n.destinatario_id) === userId;
-          const hasRespuesta = !!n.respuesta;
-          return (
-            (isRemitente && !hasRespuesta) || (isDestinatario && hasRespuesta)
-          );
+  const fetchFirmas = useCallback(
+    (silent = false) => {
+      if (!silent) setLoading(true);
+      axiosInstance
+        .get("/firma_solicitudes")
+        .then((res) => {
+          const data = res.data.filter((s) => s.solicitante_id === user?.id);
+          setSolicitudes(data);
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (!silent) setLoading(false);
         });
-        setNotas(data);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [user]);
+    },
+    [user],
+  );
+
+  const fetchTareas = useCallback(
+    (silent = false) => {
+      if (!silent) setLoading(true);
+      axiosInstance
+        .get("/tareas")
+        .then((res) => {
+          const data = res.data.filter(
+            (t) => !t.solicitante_id || t.solicitante_id === user?.id,
+          );
+          setTareas(data);
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (!silent) setLoading(false);
+        });
+    },
+    [user],
+  );
+
+  const fetchNotas = useCallback(
+    (silent = false) => {
+      if (!silent) setLoading(true);
+      axiosInstance
+        .get("/notas")
+        .then((res) => {
+          const userId = String(user?.id);
+          const data = res.data.filter(
+            (n) => String(n.remitente_id) === userId,
+          );
+          setNotas(data);
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (!silent) setLoading(false);
+        });
+    },
+    [user],
+  );
 
   useEffect(() => {
     setBusquedaPendientes("");
@@ -82,15 +93,77 @@ function MisSolicitudes() {
     if (mode === "notas") fetchNotas();
   }, [mode, fetchFirmas, fetchTareas, fetchNotas]);
 
+  // Auto-refresh silencioso cuando cambian los counts sin interrumpir interacción
+  useEffect(() => {
+    const checkInteraction = () => {
+      const hasModal = document.querySelector(".modal-firma-overlay") !== null;
+      const hasActiveInput =
+        document.activeElement?.tagName === "INPUT" ||
+        document.activeElement?.tagName === "TEXTAREA" ||
+        document.activeElement?.tagName === "SELECT";
+      setIsUserInteracting(hasModal || hasActiveInput);
+    };
+
+    checkInteraction();
+    const intervalCheck = setInterval(checkInteraction, 500);
+    return () => clearInterval(intervalCheck);
+  }, []);
+
+  // Actualiza el título de la pestaña con las notificaciones también en esta vista
   useEffect(() => {
     const total =
-      (counts?.firmas || 0) + (counts?.tareas || 0) + (counts?.notas || 0);
+      (counts?.firmas || 0) +
+      (counts?.tareas || 0) +
+      (counts?.notasBandeja || 0) +
+      (counts?.notasMisSolicitudes || 0);
     document.title = total > 0 ? `Gestiona (${total})` : "Gestiona";
   }, [counts]);
+
+  // Silent refresh cuando aumentan los counts sin interrumpir usuario
+  useEffect(() => {
+    if (!isUserInteracting) {
+      if (mode === "firmas") fetchFirmas(true);
+      if (mode === "tareas") fetchTareas(true);
+      if (mode === "notas") fetchNotas(true);
+    }
+  }, [
+    counts.firmas,
+    counts.tareas,
+    counts.notasMisSolicitudes,
+    isUserInteracting,
+    mode,
+    fetchFirmas,
+    fetchTareas,
+    fetchNotas,
+  ]);
+
+  // Refresh adicional de notas cuando cambia el contador, independiente del modo actual
+  useEffect(() => {
+    if (!isUserInteracting) {
+      fetchNotas(true);
+    }
+  }, [counts.notasMisSolicitudes, isUserInteracting, fetchNotas]);
 
   const showToast = (type, msg) => {
     setToast({ type, msg });
     setTimeout(() => setToast(null), 2000);
+  };
+
+  const handleLeerNotaRespondida = async (id) => {
+    try {
+      await axiosInstance.patch(`/notas/${id}`, {
+        action_type: "marcar_leida_respuesta_remitente",
+      });
+      setNotas((prev) =>
+        prev.map((n) =>
+          n.id === id ? { ...n, estado_remitente: "archivada" } : n,
+        ),
+      );
+      showToast("success", "Respuesta marcada como leída");
+      refreshCounts();
+    } catch (error) {
+      showToast("error", "Error al actualizar nota");
+    }
   };
 
   const handleNueva = (nueva) => {
@@ -129,8 +202,15 @@ function MisSolicitudes() {
     PendienteComponent = TareaCard;
     RealizadaComponent = TareaCard;
   } else if (mode === "notas") {
-    pendientes = notas.filter((n) => n.estado === "no_leida");
-    realizadas = notas.filter((n) => n.estado !== "no_leida");
+    const estaArchivadaParaRemitente = (n) => {
+      const leidaSinRespuesta =
+        !n.respuesta &&
+        (n.estado_destinatario === "leida" ||
+          n.estado_destinatario === "archivada");
+      return n.estado_remitente === "archivada" || leidaSinRespuesta;
+    };
+    pendientes = notas.filter((n) => !estaArchivadaParaRemitente(n));
+    realizadas = notas.filter((n) => estaArchivadaParaRemitente(n));
     PendienteComponent = NotaCard;
     RealizadaComponent = NotaCard;
   }
@@ -147,7 +227,16 @@ function MisSolicitudes() {
   const getCardProps = (item) => {
     if (mode === "firmas") return { solicitud: item };
     if (mode === "tareas") return { tarea: item, isReceptor: false };
-    if (mode === "notas") return { nota: item, isReceptor: false };
+    if (mode === "notas") {
+      return {
+        nota: item,
+        isReceptor: false,
+        onMarcarLeida:
+          item.estado_remitente === "respuesta_no_leida"
+            ? handleLeerNotaRespondida
+            : undefined,
+      };
+    }
     return {};
   };
 
@@ -157,16 +246,22 @@ function MisSolicitudes() {
     if (mode === "tareas")
       return isPendiente ? "Tareas asignadas (En curso)" : "Tareas completadas";
     if (mode === "notas")
-      return isPendiente
-        ? "Notas enviadas (No leídas)"
-        : "Notas leídas/Archivadas";
+      return isPendiente ? "Notas pendientes" : "Notas archivadas";
   };
 
   return (
     <div className="dashboard-solicitante">
       {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
 
-      <ModeSelector currentMode={mode} onModeChange={setMode} />
+      <ModeSelector
+        currentMode={mode}
+        onModeChange={setMode}
+        badges={{
+          firmas: counts.firmas,
+          tareas: counts.tareas,
+          notas: counts.notasMisSolicitudes,
+        }}
+      />
 
       <div className="solicitante-form-section fade-in" key={`${mode}-form`}>
         {mode === "firmas" && <NuevaSolicitudForm onNueva={handleNueva} />}
