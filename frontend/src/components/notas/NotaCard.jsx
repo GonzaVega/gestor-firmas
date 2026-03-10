@@ -28,7 +28,6 @@ function NotaCard({ nota, onMarcarLeida, onResponder, isReceptor }) {
     ? estadoDestinatarioActual === "no_leida"
     : estadoRemitenteActual === "respuesta_no_leida";
 
-  // Para remitente: si no hay respuesta y destinatario ya leyó → mostrar como completado
   const notaLeidaSinRespuesta =
     !isReceptor &&
     !hasRespuesta &&

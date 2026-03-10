@@ -93,7 +93,6 @@ function BandejaEntrada() {
     if (mode === "notas") fetchNotas();
   }, [mode, fetchFirmas, fetchTareas, fetchNotas]);
 
-  // Auto-refresh silencioso cuando cambian los counts sin interrumpir interacción
   useEffect(() => {
     const checkInteraction = () => {
       const hasModal = document.querySelector(".modal-firma-overlay") !== null;
@@ -109,7 +108,6 @@ function BandejaEntrada() {
     return () => clearInterval(intervalCheck);
   }, []);
 
-  // Actualiza el título de la pestaña y hace polling (background) de notificaciones
   useEffect(() => {
     const total =
       (counts?.firmas || 0) +
@@ -127,7 +125,6 @@ function BandejaEntrada() {
     };
   }, [counts, refreshCounts]);
 
-  // Silent refresh cuando aumentan los counts sin interrumpir usuario
   useEffect(() => {
     if (!isUserInteracting) {
       if (mode === "firmas") fetchFirmas(true);

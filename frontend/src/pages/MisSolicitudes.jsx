@@ -93,7 +93,6 @@ function MisSolicitudes() {
     if (mode === "notas") fetchNotas();
   }, [mode, fetchFirmas, fetchTareas, fetchNotas]);
 
-  // Auto-refresh silencioso cuando cambian los counts sin interrumpir interacción
   useEffect(() => {
     const checkInteraction = () => {
       const hasModal = document.querySelector(".modal-firma-overlay") !== null;
@@ -109,7 +108,6 @@ function MisSolicitudes() {
     return () => clearInterval(intervalCheck);
   }, []);
 
-  // Actualiza el título de la pestaña con las notificaciones también en esta vista
   useEffect(() => {
     const total =
       (counts?.firmas || 0) +
@@ -119,7 +117,6 @@ function MisSolicitudes() {
     document.title = total > 0 ? `Gestiona (${total})` : "Gestiona";
   }, [counts]);
 
-  // Silent refresh cuando aumentan los counts sin interrumpir usuario
   useEffect(() => {
     if (!isUserInteracting) {
       if (mode === "firmas") fetchFirmas(true);
@@ -137,7 +134,6 @@ function MisSolicitudes() {
     fetchNotas,
   ]);
 
-  // Refresh adicional de notas cuando cambia el contador, independiente del modo actual
   useEffect(() => {
     if (!isUserInteracting) {
       fetchNotas(true);
